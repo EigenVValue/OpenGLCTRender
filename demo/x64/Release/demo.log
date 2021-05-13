@@ -1,0 +1,16 @@
+﻿  test.cpp
+shader.obj : error LNK2001: unresolved external symbol __imp___glewGetShaderiv
+shader.obj : error LNK2001: unresolved external symbol __imp___glewCompileShader
+shader.obj : error LNK2001: unresolved external symbol __imp___glewCreateShader
+shader.obj : error LNK2001: unresolved external symbol __imp___glewCreateProgram
+shader.obj : error LNK2001: unresolved external symbol __imp___glewGetShaderInfoLog
+shader.obj : error LNK2001: unresolved external symbol __imp___glewGetProgramiv
+shader.obj : error LNK2001: unresolved external symbol __imp___glewAttachShader
+shader.obj : error LNK2001: unresolved external symbol __imp___glewShaderSource
+shader.obj : error LNK2001: unresolved external symbol __imp___glewDetachShader
+shader.obj : error LNK2001: unresolved external symbol __imp___glewGetProgramInfoLog
+shader.obj : error LNK2001: unresolved external symbol __imp___glewDeleteShader
+shader.obj : error LNK2001: unresolved external symbol __imp___glewLinkProgram
+test.obj : error LNK2001: unresolved external symbol __imp_glewExperimental
+test.obj : error LNK2001: unresolved external symbol __imp_glewInit
+D:\VS\Project\DJ medical\DJ OpenGL\demo\x64\Release\demo.exe : fatal error LNK1120: 14 unresolved externals
