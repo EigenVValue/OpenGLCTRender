@@ -1,11 +1,5 @@
-﻿  controls.cpp
-  demo.cpp
-  loadOBJ.cpp
-  shader.cpp
-  Source.cpp
-  test.cpp
+﻿  test.cpp
 d:\vs\project\openglctrender\demo\test.cpp(159): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Generating Code...
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
 shader.obj : warning LNK4049: locally defined symbol __glewAttachShader imported
 shader.obj : warning LNK4049: locally defined symbol __glewCompileShader imported
