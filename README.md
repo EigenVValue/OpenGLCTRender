@@ -1,8 +1,8 @@
 # OpenGLCTRender
 
-This project is used to study OpenGL and do the whole rendering.
-Thanks to http://www.opengl-tutorial.org/.
-And my professor, TA and friends.
+This project is used to study OpenGL and do the whole rendering.\n
+Thanks to http://www.opengl-tutorial.org/.\n
+And my professor, TA and friends.\n
 
 Pipeline:
 1. Initialize GLEW, GLFW and glm.
@@ -14,9 +14,9 @@ Pipeline:
 7. Do a flexible MVP matrix.
 8. Render.
 
-TODO:
-[ ] add light
-[ ] add texture
-[ ] get normal vector
-[ ] get UV coordinate
-[ ] make better shadow
+TODO:\n
+[ ] add light\n
+[ ] add texture\n
+[ ] get normal vector\n
+[ ] get UV coordinate\n
+[ ] make better shadow\n
