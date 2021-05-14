@@ -1,6 +1,6 @@
 // Include standard liabraries
 #include <vector>
-//#include <filesystem>
+#include <filesystem>
 
 // GLEW
 #define GLEW_STATIC
@@ -26,7 +26,7 @@ const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 
 // The MAIN function
-int main()
+int main(int argc, char* argv[])
 {
 	// Init GLFW
 	glfwInit();
@@ -85,7 +85,16 @@ int main()
 	
 	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
-	bool res = loadOBJ("cube.obj", objVertices);
+
+	std::filesystem::path currPath = argv[0];
+	currPath = currPath.parent_path();
+	currPath += "\\img\\cube.obj";
+	char* path = currPath.string().data();
+	bool res = loadOBJ(path, objVertices);
+	if (!res) {
+		printf("loadOBJ fail!");
+		return 0;
+	}
 
 	// Scale down
 	for (int i = 0; i < objVertices.size(); i++) {
@@ -130,6 +139,7 @@ int main()
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
+	printf("Start rendering\n");
 	do {
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

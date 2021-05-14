@@ -41,8 +41,8 @@ std::vector<glm::vec3> getVertexNormals(
 	const std::vector<glm::vec3> &vertices)
 {
 	// Use a lazy threshold to speed up processing.
-	// Start at 0 OR the order which is 30 order before the target point.
-	// End at last triangle OR the order which is 30 order after the target point.
+	// Start at 0 OR the order which is 12 order before the target point.
+	// End at last triangle OR the order which is 12 order after the target point.
 	// Then check if there exsits any point that equals to target point.
 	// If exsits, add up.
 	// At last, normalize it.
@@ -54,7 +54,7 @@ std::vector<glm::vec3> getVertexNormals(
 		//std::vector<glm::vec3> triangles;
 
 		// Start lazy check.
-		for (int j = newMinus(i,30); j < newAdd(i,30,vertices.size()-2); j+=3) {
+		for (int j = newMinus(i,12); j < newAdd(i,12,vertices.size()-2); j+=3) {
 			if (vertices.at(i) == vertices.at(j)
 					|| vertices.at(i) == vertices.at(j+1)
 					|| vertices.at(i) == vertices.at(j+2)) {
