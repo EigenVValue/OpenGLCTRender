@@ -30,6 +30,9 @@
     <ClCompile Include="controls.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="getNormals.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fShader.fragmentshader">
@@ -47,6 +50,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="controls.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="getNormals.hpp">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

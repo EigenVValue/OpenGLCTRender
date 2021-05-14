@@ -21,6 +21,7 @@ using namespace glm;
 #include <shader.hpp>
 #include <loadOBJ.hpp>
 #include <controls.hpp>
+#include <getNormals.hpp>
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -54,12 +55,14 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Dark blue background
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
+	// Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -70,6 +73,8 @@ int main()
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
+	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
 	// Set vertex & color
 	std::vector<glm::vec3> vertices;
@@ -90,14 +95,14 @@ int main()
 	}
 
 	// Get normal
-	//getNormal(vertices, normals);
+	normals = getNormals(vertices);
 
 	// Get color
 	for (int i = 0; i < vertices.size(); i++) {
 		vec3 temp_color;
-		temp_color.x = 255;
-		temp_color.y = 247;
-		temp_color.z = 244;
+		temp_color.x = 0.902f;
+		temp_color.y = 0.902f;
+		temp_color.z = 0.980f;
 		colors.push_back(temp_color);
 	}
 
@@ -111,6 +116,15 @@ int main()
 	glGenBuffers(1, &colorbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
 	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
+
+	GLuint normalbuffer;
+	glGenBuffers(1, &normalbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+
+	// Get a handle for our "LightPosition" uniform
+	glUseProgram(programID);
+	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
 	do {
 		// Clear the screen
@@ -129,6 +143,12 @@ int main()
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+
+		//glm::vec3 lightPos = glm::vec3(5, 5, 5);
+		glm::vec3 lightPos = getPosition();
+		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -154,6 +174,17 @@ int main()
 			(void*)0                          // array buffer offset
 		);
 		
+		// 3rd attribute buffer : normals
+		glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+		glVertexAttribPointer(
+			2,                                // attribute
+			3,                                // size
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
+		);
 
 		// Draw the triangle
 		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
@@ -174,6 +205,7 @@ int main()
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &colorbuffer);
+	glDeleteBuffers(1, &normalbuffer);
 	glDeleteProgram(programID);
 	glDeleteVertexArrays(1, &VertexArrayID);
 
@@ -181,33 +213,4 @@ int main()
 	glfwTerminate();
 
 	return 0;
-}
-
-void getNormal(const std::vector<glm::vec3> &vertices, std::vector<glm::vec3> &normals) {
-	std::vector<glm::vec3> triangle;
-	glm::vec3 vec1;
-	glm::vec3 vec2;
-	
-	// Get triangle normals
-	for (int i = 0; i < vertices.size(); i+=3) {
-		vec1.x = vertices.at(i).x - vertices.at(i+1).x;
-		vec1.y = vertices.at(i).y - vertices.at(i+1).y;
-		vec1.z = vertices.at(i).z - vertices.at(i+1).z;
-
-		vec2.x = vertices.at(i+1).x - vertices.at(i+2).x;
-		vec2.y = vertices.at(i+1).y - vertices.at(i+2).y;
-		vec2.z = vertices.at(i+1).z - vertices.at(i+2).z;
-
-		glm::vec3 tempTri = glm::cross(vec1, vec2);
-		tempTri = glm::normalize(tempTri);
-		triangle.push_back(tempTri);
-	}
-	
-	// Get vertex	normals
-	normals = vertices;
-	for (int i = 0; i < vertices.size(); i ++) {
-		for (int j = 0; j < vertices.size(); j++) {
-
-		}
-	}
 }

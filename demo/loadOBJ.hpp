@@ -1,5 +1,5 @@
-#ifndef OBJLOADER_H
-#define OBJLOADER_H
+#ifndef LOADOBJ_HPP
+#define LOADOBJ_HPP
 
 bool loadOBJ(
 	const char * path,
