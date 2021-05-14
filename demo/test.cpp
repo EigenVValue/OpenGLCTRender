@@ -1,6 +1,4 @@
-// Include standard headers
-#include <stdio.h>
-#include <stdlib.h>
+// Include standard liabraries
 #include <vector>
 //#include <filesystem>
 
@@ -23,7 +21,11 @@ using namespace glm;
 #include <controls.hpp>
 #include <getNormals.hpp>
 
-// The MAIN function, from here we start the application and run the game loop
+// Set window width and height
+const GLuint  WIDTH = 1024;
+const GLuint  HEIGHT = 768;
+
+// The MAIN function
 int main()
 {
 	// Init GLFW
@@ -36,7 +38,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	window = glfwCreateWindow(1024, 768, "demo", nullptr, nullptr);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "demo", nullptr, nullptr);
 	if (window == NULL) {
 		fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not compatible.\n");
 		getchar();
@@ -54,7 +56,7 @@ int main()
 	// Hide the mouse and enable unlimited mouvement
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	// Dark blue background
+	// set background
 	glClearColor(0.467f, 0.467f, 0.467f, 0.0f);
 
 	// Enable depth test
@@ -68,20 +70,20 @@ int main()
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
-	// Create and compile our GLSL program from the shaders
+	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
 
-	// Get a handle for our "MVP" uniform
+	// Get a handle for "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
 	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
-	// Set vertex & color
+	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> colors;
 	std::vector<glm::vec3> normals;
 	
-	// Load obj file
+	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
 	bool res = loadOBJ("cube.obj", objVertices);
 
@@ -96,9 +98,9 @@ int main()
 
 	// Get normal
 	// Surface normal vector
-	//normals = getNormals(vertices);
+	normals = getNormals(vertices);
 	// Vertex normal vector
-	normals = getVertexNormals(vertices);
+	//normals = getVertexNormals(vertices);
 
 	// Get color
 	for (int i = 0; i < vertices.size(); i++) {
@@ -108,7 +110,6 @@ int main()
 		temp_color.z = 0.502f;
 		colors.push_back(temp_color);
 	}
-
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
@@ -125,7 +126,7 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 
-	// Get a handle for our "LightPosition" uniform
+	// Get a handle for "LightPosition" uniform
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
@@ -133,23 +134,23 @@ int main()
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Use our shader
+		// Use shader
 		glUseProgram(programID);
 
 		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs();
+		computeMatricesFromInputs(WIDTH, HEIGHT);
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
 		glm::mat4 ModelMatrix = glm::mat4(1.0);
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		// Send our transformation to the currently bound shader, 
+		// Send transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-		//glm::vec3 lightPos = glm::vec3(5, 5, 5);
+		// Let light postion go with view matrix
 		glm::vec3 lightPos = getPosition();
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
@@ -198,8 +199,6 @@ int main()
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-
-		//fprintf(stderr, "Rendering\n");
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&

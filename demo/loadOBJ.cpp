@@ -2,21 +2,21 @@
 #include <vector>
 #include <stdio.h>
 #include <string>
-#include <cstring>
 #include <iostream>
 
 #include <glm/glm.hpp>
 
 #include "loadOBJ.hpp"
 
-// OBJ loader
-// Only vertices and their indices, no noramls and UVs.
-// Because we do not need it.
-
+/**
+ * OBJ loader
+ * Only vertices and their indices, no noramls and UVs.
+ * Because obj export from fiji only has its vertices and faces.
+ */
 bool loadOBJ(const char* path, std::vector<glm::vec3> & out_vertices) {
 	printf("Loading OBJ file %s...\n", path);
 
-	std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
+	std::vector<unsigned int> vertexIndices;
 	std::vector<glm::vec3> temp_vertices;
 
 	FILE * file = fopen(path, "r");
@@ -31,14 +31,16 @@ bool loadOBJ(const char* path, std::vector<glm::vec3> & out_vertices) {
 		// read the first word of the line
 		int res = fscanf(file, "%s", lineHeader);
 		if (res == EOF)
-			break; // EOF = End Of File. Quit the loop.
+			break;
 		// else : parse lineHeader
 
 		if (strcmp(lineHeader, "v") == 0) {
+			// Read line which header is v
 			glm::vec3 vertex;
 			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
 			temp_vertices.push_back(vertex);
 		} else if (strcmp(lineHeader, "f") == 0) {
+			// Read line which header is f
 			std::string vertex;
 			unsigned int vertexIndex[3];
 			int matches = fscanf(file, "%ld %ld %ld\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]);
@@ -59,7 +61,6 @@ bool loadOBJ(const char* path, std::vector<glm::vec3> & out_vertices) {
 
 	// For each vertex of each triangle
 	for (unsigned int i = 0; i < vertexIndices.size(); i++) {
-
 		// Get the indices of its attributes
 		unsigned int vertexIndex = vertexIndices[i];
 

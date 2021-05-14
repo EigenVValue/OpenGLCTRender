@@ -1,8 +1,8 @@
 // Include GLFW
 #include <GLFW/glfw3.h>
-extern GLFWwindow* window; // The "extern" keyword here is to access the variable "window" declared in tutorialXXX.cpp. This is a hack to keep the tutorials simple. Please avoid this.
+extern GLFWwindow* window; 
+// The "extern" keyword here is to access the variable "window" declared in tutorialXXX.cpp. This is a hack to keep the tutorials simple. Please avoid this.
 
-// Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
@@ -24,7 +24,6 @@ glm::vec3 getPosition() {
 	return position;
 }
 
-
 // Initial horizontal angle : 
 float horizontalAngle = 0.50f;
 // Initial vertical angle : none
@@ -35,9 +34,8 @@ float initialFoV = 45.0f;
 float speed = 3.0f; // 3 units / second
 float mouseSpeed = 0.0005f;
 
-
-
-void computeMatricesFromInputs() {
+void computeMatricesFromInputs(const int WIDTH,
+		const int HEIGHT) {
 
 	// glfwGetTime is called only once, the first time this function is called
 	static double lastTime = glfwGetTime();
@@ -51,11 +49,11 @@ void computeMatricesFromInputs() {
 	glfwGetCursorPos(window, &xpos, &ypos);
 
 	// Reset mouse position for next frame
-	glfwSetCursorPos(window, 1024 / 2, 768 / 2);
+	glfwSetCursorPos(window, WIDTH / 2, HEIGHT / 2);
 
 	// Compute new orientation
-	horizontalAngle += mouseSpeed * float(1024 / 2 - xpos);
-	verticalAngle += mouseSpeed * float(768 / 2 - ypos);
+	horizontalAngle += mouseSpeed * float(WIDTH / 2 - xpos);
+	verticalAngle += mouseSpeed * float(HEIGHT / 2 - ypos);
 
 	// Direction : Spherical coordinates to Cartesian coordinates conversion
 	glm::vec3 direction(
@@ -91,9 +89,9 @@ void computeMatricesFromInputs() {
 		position -= right * deltaTime * speed;
 	}
 
-	float FoV = initialFoV;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
+	float FoV = initialFoV;
 
-	// Projection matrix : 45 Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+	// Projection matrix : Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	ProjectionMatrix = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
 	// Camera matrix
 	ViewMatrix = glm::lookAt(
