@@ -1,2 +1,6 @@
-﻿  controls.cpp
+﻿  getNormals.cpp
+d:\vs\project\openglctrender\demo\getnormals.cpp(46): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  test.cpp
+d:\vs\project\openglctrender\demo\test.cpp(191): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Generating Code...
   demo.vcxproj -> D:\VS\Project\OpenGLCTRender\x64\Debug\demo.exe

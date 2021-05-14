@@ -12,7 +12,7 @@ Initialization:
 4.  Create MVP, view and model matrix.
 5.  Load cube.obj to get vertices.
 6.  Scale down vertices because it is too large to see clearly.
-7.  Calculate surface normal vector.
+7.  Calculate vertex normal vector OR surface normal vector.
 8.  Set colors.
 
 Rendering:

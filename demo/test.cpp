@@ -55,7 +55,7 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Dark blue background
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	glClearColor(0.467f, 0.467f, 0.467f, 0.0f);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -95,14 +95,17 @@ int main()
 	}
 
 	// Get normal
-	normals = getNormals(vertices);
+	// Surface normal vector
+	//normals = getNormals(vertices);
+	// Vertex normal vector
+	normals = getVertexNormals(vertices);
 
 	// Get color
 	for (int i = 0; i < vertices.size(); i++) {
 		vec3 temp_color;
-		temp_color.x = 0.902f;
-		temp_color.y = 0.902f;
-		temp_color.z = 0.980f;
+		temp_color.x = 0.502f;
+		temp_color.y = 0.502f;
+		temp_color.z = 0.502f;
 		colors.push_back(temp_color);
 	}
 

@@ -16,13 +16,13 @@ uniform vec3 LightPosition_worldspace;
 
 void main(){
 	// Light emission properties
-	vec3 LightColor = vec3(1,1,1);
-	float LightPower = 2.0f;
+	vec3 LightColor = vec3(0.753,0.753,0.753);
+	float LightPower = 20.0f;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = fragmentColor;
-	vec3 MaterialAmbientColor = vec3(0.5,0.5,0.5) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.1,0.1,0.1);
+	vec3 MaterialAmbientColor = vec3(0.7,0.7,0.7) * MaterialDiffuseColor;
+	vec3 MaterialSpecularColor = vec3(0.5,0.5,0.5);
 
 	// Distance to the light
 	float distance = length( LightPosition_worldspace - Position_worldspace );
@@ -50,7 +50,7 @@ void main(){
 	
 	color = 
 		// Ambient : simulates indirect lighting
-		MaterialAmbientColor +
+		MaterialAmbientColor * LightColor +
 		// Diffuse : "color" of the object
 		MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) +
 		// Specular : reflective highlight, like a mirror

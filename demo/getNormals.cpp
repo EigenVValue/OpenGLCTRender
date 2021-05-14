@@ -33,3 +33,57 @@ glm::vec3 getNormal(const glm::vec3 &vertex1,
 
 	return normal;
 }
+
+std::vector<glm::vec3> getVertexNormals(
+	const std::vector<glm::vec3> &vertices
+) {
+	std::vector<glm::vec3> normals;
+	for (int i = 0; i < vertices.size(); i ++)
+	{
+		glm::vec3 normal;
+		glm::vec3 triangle;
+		std::vector<glm::vec3> triangles;
+		for (int j = newMinus(i,30); j < newAdd(i,30,vertices.size()-2); j+=3) {
+			if (vertices.at(i) == vertices.at(j)
+					|| vertices.at(i) == vertices.at(j+1)
+					|| vertices.at(i) == vertices.at(j+2)){
+				triangle += getNormal(vertices.at(j),vertices.at(j+1), vertices.at(j+2));
+				//triangles.push_back(triangle);
+			}  else{
+				continue;
+			}
+		}
+
+		//triangle = triangles.at(0);
+		//for (int j = 1; j < triangles.size(); j++)
+		//{
+		//	triangle += triangles.at(j);
+		//}
+
+		normal = glm::normalize(triangle);
+		normals.push_back(normal);
+	}
+	return normals;
+}
+
+int newMinus(int a, int b) {
+	if (a-b < 0)
+	{
+		return 0;
+	}
+	else
+	{
+		return a - b;
+	}
+}
+
+int newAdd(int a, int b, int c) {
+	if (a + b > c)
+	{
+		return c;
+	}
+	else
+	{
+		return a + b;
+	}
+}
