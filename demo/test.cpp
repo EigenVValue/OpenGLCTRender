@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> colors;
 	std::vector<glm::vec3> normals;
-	
+
 	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
 
@@ -99,17 +99,17 @@ int main(int argc, char* argv[])
 	// Scale down
 	for (int i = 0; i < objVertices.size(); i++) {
 		vec3 temp_vex;
-		temp_vex.x = objVertices.at(i).x/60;
-		temp_vex.y = objVertices.at(i).y/60;
-		temp_vex.z = objVertices.at(i).z/60;
+		temp_vex.x = objVertices.at(i).x / 60;
+		temp_vex.y = objVertices.at(i).y / 60;
+		temp_vex.z = objVertices.at(i).z / 60;
 		vertices.push_back(temp_vex);
 	}
 
 	// Get normal
 	// Surface normal vector
-	normals = getNormals(vertices);
+	//normals = getNormals(vertices);
 	// Vertex normal vector
-	//normals = getVertexNormals(vertices);
+	normals = getVertexNormals(vertices);
 
 	// Get color
 	for (int i = 0; i < vertices.size(); i++) {
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	
+
 	GLuint colorbuffer;
 	glGenBuffers(1, &colorbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
@@ -161,7 +161,8 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		// Let light postion go with view matrix
-		glm::vec3 lightPos = getPosition();
+		//glm::vec3 lightPos = getPosition();
+		glm::vec3 lightPos = vec3(3.0f, 8.0f, 0.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
 		// 1rst attribute buffer : vertices
@@ -175,7 +176,7 @@ int main(int argc, char* argv[])
 			0,                  // stride
 			(void*)0            // array buffer offset
 		);
-		
+
 		// 2nd attribute buffer : colors
 		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
@@ -187,7 +188,7 @@ int main(int argc, char* argv[])
 			0,                                // stride
 			(void*)0                          // array buffer offset
 		);
-		
+
 		// 3rd attribute buffer : normals
 		glEnableVertexAttribArray(2);
 		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);

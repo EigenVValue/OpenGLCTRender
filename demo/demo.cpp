@@ -1,7 +1,7 @@
 /*
 // Include standard liabraries
 #include <vector>
-//#include <filesystem>
+#include <filesystem>
 
 // GLEW
 #define GLEW_STATIC
@@ -20,6 +20,7 @@ using namespace glm;
 #include <shader.hpp>
 #include <loadOBJ.hpp>
 #include <controls.hpp>
+#include <texture.hpp>
 #include <getNormals.hpp>
 
 // Set window width and height
@@ -27,11 +28,12 @@ const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 
 // The MAIN function
-int main()
+int main(int argc, char* argv[])
 {
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
@@ -66,6 +68,10 @@ int main()
 	glDepthFunc(GL_LESS);
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+
+
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -81,12 +87,21 @@ int main()
 
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> colors;
+	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
 	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
-	bool res = loadOBJ("cube.obj", objVertices);
+
+	std::filesystem::path currPath = argv[0];
+	currPath = currPath.parent_path();
+	currPath += "\\img\\cube.obj";
+	char* path = currPath.string().data();
+	bool res = loadOBJ(path, objVertices);
+	if (!res) {
+		printf("loadOBJ fail!");
+		return 0;
+	}
 
 	// Scale down
 	for (int i = 0; i < objVertices.size(); i++) {
@@ -99,28 +114,47 @@ int main()
 
 	// Get normal
 	// Surface normal vector
-	normals = getNormals(vertices);
+	//normals = getNormals(vertices);
 	// Vertex normal vector
-	//normals = getVertexNormals(vertices);
+	normals = getVertexNormals(vertices);
 
-	// Get color
-	for (int i = 0; i < vertices.size(); i++) {
-		vec3 temp_color;
-		temp_color.x = 0.502f;
-		temp_color.y = 0.502f;
-		temp_color.z = 0.502f;
-		colors.push_back(temp_color);
+	// Get UVs
+	for (int i = 0; i < vertices.size(); i += 3) {
+		vec2 temp_uv1;
+		vec2 temp_uv2;
+		vec2 temp_uv3;
+
+		temp_uv1.x = 0.0f;
+		temp_uv1.y = 0.0f;
+		temp_uv2.x = 1.0f;
+		temp_uv2.y = 0.0f;
+		temp_uv3.x = 0.5f;
+		temp_uv3.y = 1.0f;
+		uvs.push_back(temp_uv1);
+		uvs.push_back(temp_uv2);
+		uvs.push_back(temp_uv2);
 	}
+
+	// Load the texture
+	currPath = argv[0];
+	currPath = currPath.parent_path();
+	std::filesystem::path imgPath = currPath;
+	imgPath += "\\img\\uvtemplate.bmp";
+	path = imgPath.string().data();
+	GLuint Texture = loadBMP_custom(path);
+
+	// Get a handle for our "myTextureSampler" uniform
+	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint colorbuffer;
-	glGenBuffers(1, &colorbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);
@@ -131,6 +165,7 @@ int main()
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
+	printf("Start rendering\n");
 	do {
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -155,6 +190,12 @@ int main()
 		glm::vec3 lightPos = getPosition();
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Texture);
+		// Set our "myTextureSampler" sampler to use Texture Unit 0
+		glUniform1i(TextureID, 0);
+
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -167,12 +208,12 @@ int main()
 			(void*)0            // array buffer offset
 		);
 
-		// 2nd attribute buffer : colors
+		// 2nd attribute buffer : UVs
 		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 		glVertexAttribPointer(
-			1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-			3,                                // size
+			1,                                // attribute
+			2,                                // size
 			GL_FLOAT,                         // type
 			GL_FALSE,                         // normalized?
 			0,                                // stride
@@ -207,7 +248,7 @@ int main()
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &colorbuffer);
+	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteProgram(programID);
 	glDeleteVertexArrays(1, &VertexArrayID);
@@ -217,4 +258,5 @@ int main()
 
 	return 0;
 }
+
 */

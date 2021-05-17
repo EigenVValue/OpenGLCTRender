@@ -30,9 +30,10 @@ glm::vec3 getNormal(const glm::vec3 &vertex1,
 	// U = p2 - p1
 	// V = p3 - p1
 	// N = U X V
-	glm::vec3 vecU = vertex2 - vertex1;
-	glm::vec3 vecV = vertex3 - vertex1;
-	normal = glm::cross(vecU, vecV);
+	glm::vec3 vecU = vertex1 - vertex2;
+	glm::vec3 vecV = vertex1 - vertex3;
+	normal = glm::normalize(glm::cross(vecU, vecV));
+	
 
 	return normal;
 }
@@ -50,26 +51,29 @@ std::vector<glm::vec3> getVertexNormals(
 	for (int i = 0; i < vertices.size(); i ++)
 	{
 		glm::vec3 normal;
-		glm::vec3 triangle; // THIS MAY BE DANGOUS IF ANY ERROR HAPPENS CHECK IT.
-		//std::vector<glm::vec3> triangles;
+		glm::vec3 triangle = vertices.at(i);
+		int n = 1;
 
-		// Start lazy check.
-		for (int j = newMinus(i,12); j < newAdd(i,12,vertices.size()-2); j+=3) {
+		// Start lazy check./*
+		for (int j = newMinus(3*(i/3),300); j < newAdd(3 * (i/3),300,vertices.size()); j+=3) {
+			if (j == i) {
+				continue;
+			}
 			if (vertices.at(i) == vertices.at(j)
 					|| vertices.at(i) == vertices.at(j+1)
 					|| vertices.at(i) == vertices.at(j+2)) {
 				triangle += getNormal(vertices.at(j),vertices.at(j+1), vertices.at(j+2));
-				//triangles.push_back(triangle);
+				n++;
 			} else{
 				continue;
 			}
 		}
-		//triangle = triangles.at(0);
-		//for (int j = 1; j < triangles.size(); j++)
-		//{
-		//	triangle += triangles.at(j);
-		//}
-		normal = glm::normalize(triangle);
+		triangle.x = triangle.x / n;
+		triangle.y = triangle.y / n;
+		triangle.z = triangle.z / n;
+
+		normal = triangle;
+		
 		normals.push_back(normal);
 	}
 	return normals;

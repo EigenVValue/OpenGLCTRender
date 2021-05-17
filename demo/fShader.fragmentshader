@@ -20,9 +20,9 @@ void main(){
 	float LightPower = 20.0f;
 
 	// Material properties
-	vec3 MaterialDiffuseColor = fragmentColor;
-	vec3 MaterialAmbientColor = vec3(0.7,0.7,0.7) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.5,0.5,0.5);
+	vec3 MaterialDiffuseColor = vec3(0.5,0.5,0.5);
+	vec3 MaterialAmbientColor = vec3(0.8,0.8,0.8);
+	vec3 MaterialSpecularColor = vec3(0.05,0.05,0.05);
 
 	// Distance to the light
 	float distance = length( LightPosition_worldspace - Position_worldspace );
@@ -54,5 +54,5 @@ void main(){
 		// Diffuse : "color" of the object
 		MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) +
 		// Specular : reflective highlight, like a mirror
-		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance);
+		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,1) / (distance*distance);
 }

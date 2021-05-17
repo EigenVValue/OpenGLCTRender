@@ -33,6 +33,12 @@
     <ClCompile Include="getNormals.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="vboIndex.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fShader.fragmentshader">
@@ -55,5 +61,16 @@
     <ClInclude Include="getNormals.hpp">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="vboIndex.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="code.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

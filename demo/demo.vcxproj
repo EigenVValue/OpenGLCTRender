@@ -153,6 +153,8 @@
     <ClCompile Include="loadOBJ.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="texture.cpp" />
+    <ClCompile Include="vboIndex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fShader.fragmentshader" />
@@ -163,6 +165,11 @@
     <ClInclude Include="getNormals.hpp" />
     <ClInclude Include="loadOBJ.hpp" />
     <ClInclude Include="shader.hpp" />
+    <ClInclude Include="texture.hpp" />
+    <ClInclude Include="vboIndex.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="code.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
