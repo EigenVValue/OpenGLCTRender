@@ -23,7 +23,7 @@ std::vector<glm::vec3> getNormals(
 	return normals;
 }
 
-glm::vec3 getNormal(const glm::vec3 &vertex1,
+ glm::vec3 getNormal(const glm::vec3 &vertex1,
 	const glm::vec3 &vertex2, const glm::vec3 &vertex3)
 {
 	glm::vec3 normal;
@@ -32,7 +32,7 @@ glm::vec3 getNormal(const glm::vec3 &vertex1,
 	// N = U X V
 	glm::vec3 vecU = vertex1 - vertex2;
 	glm::vec3 vecV = vertex1 - vertex3;
-	normal = glm::normalize(glm::cross(vecU, vecV));
+	normal = glm::cross(vecU, vecV);
 	
 
 	return normal;
@@ -51,28 +51,20 @@ std::vector<glm::vec3> getVertexNormals(
 	for (int i = 0; i < vertices.size(); i ++)
 	{
 		glm::vec3 normal;
-		glm::vec3 triangle = vertices.at(i);
-		int n = 1;
+		glm::vec3 triangle = glm::vec3(0,0,0);
 
-		// Start lazy check./*
+		// Start lazy check
 		for (int j = newMinus(3*(i/3),300); j < newAdd(3 * (i/3),300,vertices.size()); j+=3) {
-			if (j == i) {
-				continue;
-			}
 			if (vertices.at(i) == vertices.at(j)
 					|| vertices.at(i) == vertices.at(j+1)
 					|| vertices.at(i) == vertices.at(j+2)) {
-				triangle += getNormal(vertices.at(j),vertices.at(j+1), vertices.at(j+2));
-				n++;
+				triangle += getNormal(vertices.at(j), vertices.at(j + 1), vertices.at(j + 2));
+									//* getArea(vertices.at(j), vertices.at(j + 1), vertices.at(j + 2));
 			} else{
 				continue;
 			}
 		}
-		triangle.x = triangle.x / n;
-		triangle.y = triangle.y / n;
-		triangle.z = triangle.z / n;
-
-		normal = triangle;
+		normal = glm::normalize(triangle);
 		
 		normals.push_back(normal);
 	}
@@ -92,4 +84,21 @@ int newAdd(int a, int b, int c) {
 	} else {
 		return a + b;
 	}
+}
+
+// Use Heron's formula to calculate
+// area of triangle
+float getArea(glm::vec3 vec1, glm::vec3 vec2, glm::vec3 vec3) {
+	// Heron's formula:
+	// L = (a+b+c)/2
+	// S = sqr(L*(L-a)*(L-b)*(L-c)
+
+	float len1 = glm::length(vec1-vec2);
+	float len2 = glm::length(vec2-vec3);
+	float len3 = glm::length(vec1-vec3);
+	float l = len1 + len2 + len3;
+	l /= 2;
+	float s = glm::sqrt(l*(l - len1)*(l - len2)*(l - len3));
+
+	return s;
 }

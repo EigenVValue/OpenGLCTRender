@@ -65,6 +65,8 @@ int main(int argc, char* argv[])
 	glDepthFunc(GL_LESS);
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
+	// Shade model
+	glShadeModel(GL_SMOOTH);
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -107,9 +109,9 @@ int main(int argc, char* argv[])
 
 	// Get normal
 	// Surface normal vector
-	//normals = getNormals(vertices);
+	normals = getNormals(vertices);
 	// Vertex normal vector
-	normals = getVertexNormals(vertices);
+	//normals = getVertexNormals(vertices);
 
 	// Get color
 	for (int i = 0; i < vertices.size(); i++) {
@@ -161,8 +163,8 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		// Let light postion go with view matrix
-		//glm::vec3 lightPos = getPosition();
-		glm::vec3 lightPos = vec3(3.0f, 8.0f, 0.0f);
+		glm::vec3 lightPos = getPosition();
+		//glm::vec3 lightPos = vec3(3.0f, 8.0f, 0.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
 		// 1rst attribute buffer : vertices
