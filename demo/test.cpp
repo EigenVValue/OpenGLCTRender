@@ -163,8 +163,8 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		// Let light postion go with view matrix
-		glm::vec3 lightPos = getPosition();
-		//glm::vec3 lightPos = vec3(3.0f, 8.0f, 0.0f);
+		//glm::vec3 lightPos = getPosition();
+		glm::vec3 lightPos = vec3(3.0f, 8.0f, 0.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
 		// 1rst attribute buffer : vertices

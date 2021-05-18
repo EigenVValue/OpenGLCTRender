@@ -59,7 +59,7 @@ void main(){
 	float cosAlpha = clamp( dot(v,r), 0,1 );
 
 	// Specular : ks * Ls * (v.r)^n * att
-	vec3 specular = MaterialSpecularColor * (LightColor) * pow(cosAlpha,0.1) / (distance*distance);
+	vec3 specular = MaterialSpecularColor * (LightColor) * pow(cosAlpha,130) / (distance*distance);
 	
 	color = global_amb + ambient + diffuse + specular;
 }
