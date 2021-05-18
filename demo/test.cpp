@@ -87,31 +87,37 @@ int main(int argc, char* argv[])
 
 	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
+	std::vector<unsigned int> objFaces;
 
-	std::filesystem::path currPath = argv[0];
-	currPath = currPath.parent_path();
-	currPath += "\\img\\cube.obj";
-	char* path = currPath.string().data();
-	bool res = loadOBJ(path, objVertices);
-	if (!res) {
-		printf("loadOBJ fail!");
-		return 0;
+	// Load obj
+	{
+		std::filesystem::path currPath = argv[0];
+		currPath = currPath.parent_path();
+		currPath += "\\img\\cube.obj";
+		char* path = currPath.string().data();
+		bool res = loadOBJ(path, objVertices, objFaces);
+		if (!res) {
+			printf("loadOBJ fail!");
+			return 0;
+		}
 	}
 
 	// Scale down
 	for (int i = 0; i < objVertices.size(); i++) {
-		vec3 temp_vex;
-		temp_vex.x = objVertices.at(i).x / 60;
-		temp_vex.y = objVertices.at(i).y / 60;
-		temp_vex.z = objVertices.at(i).z / 60;
-		vertices.push_back(temp_vex);
+		objVertices[i].x = objVertices[i].x / 60;
+		objVertices[i].y = objVertices[i].y / 60;
+		objVertices[i].z = objVertices[i].z / 60;
 	}
+
+	// Get vertex
+	objVerticesToGLVertices(vertices, objVertices, objFaces);
+	
 
 	// Get normal
 	// Surface normal vector
-	normals = getNormals(vertices);
+	//normals = getNormals(vertices);
 	// Vertex normal vector
-	//normals = getVertexNormals(vertices);
+	normals = getVertexNormals(objVertices,objFaces);
 
 	// Get color
 	for (int i = 0; i < vertices.size(); i++) {
@@ -164,7 +170,7 @@ int main(int argc, char* argv[])
 
 		// Let light postion go with view matrix
 		//glm::vec3 lightPos = getPosition();
-		glm::vec3 lightPos = vec3(3.0f, 8.0f, 0.0f);
+		glm::vec3 lightPos = vec3(3.0f, 5.0f, 5.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
 		// 1rst attribute buffer : vertices

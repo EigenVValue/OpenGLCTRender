@@ -10,12 +10,11 @@ glm::vec3 getNormal(const glm::vec3 &vertex1,
 );
 
 std::vector<glm::vec3> getVertexNormals(
-	const std::vector<glm::vec3> &vertices
-);
+	const std::vector<glm::vec3> &objVertices,
+	const std::vector<unsigned int> &objFaces);
 
 int newMinus(int a, int b);
 int newAdd(int a, int b, int c);
-
 float getArea(glm::vec3 vec1, glm::vec3 vec2, glm::vec3 vec3);
 
 #endif

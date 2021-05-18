@@ -1,4 +1,5 @@
 #include <vector>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 
@@ -39,35 +40,53 @@ std::vector<glm::vec3> getNormals(
 }
 
 std::vector<glm::vec3> getVertexNormals(
-	const std::vector<glm::vec3> &vertices)
+	const std::vector<glm::vec3> &objVertices,
+	const std::vector<unsigned int> &objFaces)
 {
-	// Use a lazy threshold to speed up processing.
-	// Start at 0 OR the order which is 12 order before the target point.
-	// End at last triangle OR the order which is 12 order after the target point.
-	// Then check if there exsits any point that equals to target point.
-	// If exsits, add up.
-	// At last, normalize it.
 	std::vector<glm::vec3> normals;
-	for (int i = 0; i < vertices.size(); i ++)
-	{
-		glm::vec3 normal;
-		glm::vec3 triangle = glm::vec3(0,0,0);
+	std::unordered_map<int, glm::vec3> hashTable;
 
-		// Start lazy check
-		for (int j = newMinus(3*(i/3),300); j < newAdd(3 * (i/3),300,vertices.size()); j+=3) {
-			if (vertices.at(i) == vertices.at(j)
-					|| vertices.at(i) == vertices.at(j+1)
-					|| vertices.at(i) == vertices.at(j+2)) {
-				triangle += getNormal(vertices.at(j), vertices.at(j + 1), vertices.at(j + 2));
-									//* getArea(vertices.at(j), vertices.at(j + 1), vertices.at(j + 2));
-			} else{
-				continue;
-			}
+	// Hashing
+	for (int i = 0; i < objFaces.size(); i+=3) {
+		auto faceNorm = getNormal(
+				objVertices.at(objFaces .at(i)-1),
+				objVertices.at(objFaces.at(i+1) -1),
+				objVertices.at(objFaces.at(i+2) -1))
+			* getArea(
+				objVertices.at(objFaces.at(i) -1),
+				objVertices.at(objFaces.at(i+1) -1),
+				objVertices.at(objFaces.at(i+2) -1));
+
+		// Vertex 1
+		if (hashTable.count(objFaces.at(i)) == 0) { // If not exist
+			hashTable[objFaces.at(i)] = faceNorm;
+		} else { // If already exist
+			hashTable[objFaces.at(i)] += faceNorm;
 		}
-		normal = glm::normalize(triangle);
-		
+		// Vertex 2
+		if (hashTable.count(objFaces.at(i+1)) == 0) { // If not exist
+			hashTable[objFaces.at(i+1)] = faceNorm;
+		}
+		else { // If already exist
+			hashTable[objFaces.at(i+1)] += faceNorm;
+		}
+		// Vertex 3
+		if (hashTable.count(objFaces.at(i+2)) == 0) { // If not exist
+			hashTable[objFaces.at(i+2)] = faceNorm;
+		}
+		else { // If already exist
+			hashTable[objFaces.at(i+2)] += faceNorm;
+		}
+	}
+
+	// Build normals
+	for (int i = 0; i < objFaces.size(); i++)
+	{
+		glm::vec3 normal = hashTable[objFaces.at(i)];
+		normal = glm::normalize(normal);
 		normals.push_back(normal);
 	}
+
 	return normals;
 }
 

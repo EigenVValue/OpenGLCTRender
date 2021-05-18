@@ -13,11 +13,9 @@
  * Only vertices and their indices, no noramls and UVs.
  * Because obj export from fiji only has its vertices and faces.
  */
-bool loadOBJ(const char* path, std::vector<glm::vec3> & out_vertices) {
+bool loadOBJ(const char* path, std::vector<glm::vec3> & objVertices,
+	std::vector<unsigned int> & objFaces) {
 	printf("Loading OBJ file %s...\n", path);
-
-	std::vector<unsigned int> vertexIndices;
-	std::vector<glm::vec3> temp_vertices;
 
 	FILE * file = fopen(path, "r");
 	if (file == NULL) {
@@ -38,40 +36,41 @@ bool loadOBJ(const char* path, std::vector<glm::vec3> & out_vertices) {
 			// Read line which header is v
 			glm::vec3 vertex;
 			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
-			temp_vertices.push_back(vertex);
+			objVertices.push_back(vertex);
 		} else if (strcmp(lineHeader, "f") == 0) {
 			// Read line which header is f
-			std::string vertex;
-			unsigned int vertexIndex[3];
-			int matches = fscanf(file, "%ld %ld %ld\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]);
+			unsigned int face[3];
+			int matches = fscanf(file, "%ld %ld %ld\n", &face[0], &face[1], &face[2]);
 			if (matches != 3) {
 				printf("File can't be read by our simple parser\n");
 				fclose(file);
 				return false;
 			}
-			vertexIndices.push_back(vertexIndex[0]);
-			vertexIndices.push_back(vertexIndex[1]);
-			vertexIndices.push_back(vertexIndex[2]);
+			objFaces.push_back(face[0]);
+			objFaces.push_back(face[1]);
+			objFaces.push_back(face[2]);
 		} else {
 			// Probably a comment, eat up the rest of the line
 			char stupidBuffer[1000];
 			fgets(stupidBuffer, 1000, file);
 		}
 	} // Loop ends
-
-	// For each vertex of each triangle
-	for (unsigned int i = 0; i < vertexIndices.size(); i++) {
-		// Get the indices of its attributes
-		unsigned int vertexIndex = vertexIndices[i];
-
-		// Get the attributes thanks to the index
-		glm::vec3 vertex = temp_vertices[vertexIndex - 1];
-
-		// Put the attributes in buffers
-		out_vertices.push_back(vertex);
-	}
-
+	
 	fclose(file);
 	printf("End Loading...\n");
 	return true;
+}
+
+void objVerticesToGLVertices(std::vector<glm::vec3> & out_vertices,
+	const std::vector<glm::vec3> & objVertices,
+	const std::vector<unsigned int> & objFaces) {
+	// For each vertex of each triangle
+	for (unsigned int i = 0; i < objFaces.size(); i++) {
+		// Get the indices of its attributes
+		unsigned int vertexIndex = objFaces[i];
+
+		// Get the attributes thanks to the index
+		glm::vec3 vertex = objVertices[vertexIndex - 1];
+		out_vertices.push_back(vertex);
+	}
 }
