@@ -82,7 +82,7 @@
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)dependencies\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)demo;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -138,6 +138,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +152,7 @@
     <ClCompile Include="demo.cpp" />
     <ClCompile Include="getNormals.cpp" />
     <ClCompile Include="loadOBJ.cpp" />
+    <ClCompile Include="quaternion_utils.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -164,6 +166,7 @@
     <ClInclude Include="controls.hpp" />
     <ClInclude Include="getNormals.hpp" />
     <ClInclude Include="loadOBJ.hpp" />
+    <ClInclude Include="quaternion_utils.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="texture.hpp" />
     <ClInclude Include="vboIndex.hpp" />

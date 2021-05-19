@@ -20,20 +20,22 @@ using namespace glm;
 #include <shader.hpp>
 #include <loadOBJ.hpp>
 #include <controls.hpp>
-#include <texture.hpp>
 #include <getNormals.hpp>
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 
+// Rotation
+vec3 gOrientation1;
+
 // The MAIN function
 int main(int argc, char* argv[])
 {
+
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
-	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
@@ -68,10 +70,8 @@ int main(int argc, char* argv[])
 	glDepthFunc(GL_LESS);
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-
-
+	// Shade model
+	glShadeModel(GL_SMOOTH);
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -80,6 +80,8 @@ int main(int argc, char* argv[])
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
 
+	float start = clock();
+
 	// Get a handle for "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
@@ -87,74 +89,60 @@ int main(int argc, char* argv[])
 
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> uvs;
+	std::vector<glm::vec3> colors;
 	std::vector<glm::vec3> normals;
 
 	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
+	std::vector<unsigned int> objFaces;
 
-	std::filesystem::path currPath = argv[0];
-	currPath = currPath.parent_path();
-	currPath += "\\img\\cube.obj";
-	char* path = currPath.string().data();
-	bool res = loadOBJ(path, objVertices);
-	if (!res) {
-		printf("loadOBJ fail!");
-		return 0;
+	// Load obj
+	{
+		std::filesystem::path currPath = argv[0];
+		currPath = currPath.parent_path();
+		currPath += "\\img\\cube.obj";
+		char* path = currPath.string().data();
+		bool res = loadOBJ(path, objVertices, objFaces);
+		if (!res) {
+			printf("loadOBJ fail!");
+			return 0;
+		}
 	}
 
 	// Scale down
 	for (int i = 0; i < objVertices.size(); i++) {
-		vec3 temp_vex;
-		temp_vex.x = objVertices.at(i).x/60;
-		temp_vex.y = objVertices.at(i).y/60;
-		temp_vex.z = objVertices.at(i).z/60;
-		vertices.push_back(temp_vex);
+		objVertices[i].x = objVertices[i].x / 60;
+		objVertices[i].y = objVertices[i].y / 60;
+		objVertices[i].z = objVertices[i].z / 60;
 	}
+
+	// Get vertex
+	objVerticesToGLVertices(vertices, objVertices, objFaces);
 
 	// Get normal
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
-	normals = getVertexNormals(vertices);
+	normals = getVertexNormals(objVertices,objFaces);
 
-	// Get UVs
-	for (int i = 0; i < vertices.size(); i += 3) {
-		vec2 temp_uv1;
-		vec2 temp_uv2;
-		vec2 temp_uv3;
-
-		temp_uv1.x = 0.0f;
-		temp_uv1.y = 0.0f;
-		temp_uv2.x = 1.0f;
-		temp_uv2.y = 0.0f;
-		temp_uv3.x = 0.5f;
-		temp_uv3.y = 1.0f;
-		uvs.push_back(temp_uv1);
-		uvs.push_back(temp_uv2);
-		uvs.push_back(temp_uv2);
+	// Get color
+	for (int i = 0; i < vertices.size(); i++) {
+		vec3 temp_color;
+		temp_color.x = 0.502f;
+		temp_color.y = 0.502f;
+		temp_color.z = 0.502f;
+		colors.push_back(temp_color);
 	}
-
-	// Load the texture
-	currPath = argv[0];
-	currPath = currPath.parent_path();
-	std::filesystem::path imgPath = currPath;
-	imgPath += "\\img\\uvtemplate.bmp";
-	path = imgPath.string().data();
-	GLuint Texture = loadBMP_custom(path);
-
-	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	GLuint colorbuffer;
+	glGenBuffers(1, &colorbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
 
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);
@@ -165,6 +153,9 @@ int main(int argc, char* argv[])
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
+	float end = clock();
+	printf("%f%s", (end - start) / CLOCKS_PER_SEC, " seconds \n");
+
 	printf("Start rendering\n");
 	do {
 		// Clear the screen
@@ -173,74 +164,84 @@ int main(int argc, char* argv[])
 		// Use shader
 		glUseProgram(programID);
 
+		/*
+		/ This is orientation
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs(WIDTH, HEIGHT);
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
 		glm::mat4 ModelMatrix = glm::mat4(1.0);
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		
 
-		// Send transformation to the currently bound shader,
-		// in the "MVP" uniform
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
-		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+		// Euler
+		// As an example, rotate arount the vertical axis at 180?sec
+gOrientation1.y += 3.14159f / 2.0f * deltaTime;
 
-		// Let light postion go with view matrix
-		glm::vec3 lightPos = getPosition();
-		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+// Build the model matrix
+glm::mat4 RotationMatrix = eulerAngleYXZ(gOrientation1.y, gOrientation1.x, gOrientation1.z);
+glm::mat4 TranslationMatrix = translate(mat4(), gPosition1); // A bit to the left
+glm::mat4 ScalingMatrix = scale(mat4(), vec3(1.0f, 1.0f, 1.0f));
+glm::mat4 ModelMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
 
-		// Bind our texture in Texture Unit 0
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Texture);
-		// Set our "myTextureSampler" sampler to use Texture Unit 0
-		glUniform1i(TextureID, 0);
+glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
+// Send transformation to the currently bound shader, 
+// in the "MVP" uniform
+glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-		// 2nd attribute buffer : UVs
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glVertexAttribPointer(
-			1,                                // attribute
-			2,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
+// Let light postion go with view matrix
+//glm::vec3 lightPos = getPosition();
+glm::vec3 lightPos = vec3(3.0f, 5.0f, 5.0f);
+glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
-		// 3rd attribute buffer : normals
-		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-		glVertexAttribPointer(
-			2,                                // attribute
-			3,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
+// 1rst attribute buffer : vertices
+glEnableVertexAttribArray(0);
+glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+glVertexAttribPointer(
+	0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+	3,                  // size
+	GL_FLOAT,           // type
+	GL_FALSE,           // normalized?
+	0,                  // stride
+	(void*)0            // array buffer offset
+);
 
-		// Draw the triangle
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+// 2nd attribute buffer : colors
+glEnableVertexAttribArray(1);
+glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+glVertexAttribPointer(
+	1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+	3,                                // size
+	GL_FLOAT,                         // type
+	GL_FALSE,                         // normalized?
+	0,                                // stride
+	(void*)0                          // array buffer offset
+);
 
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
+// 3rd attribute buffer : normals
+glEnableVertexAttribArray(2);
+glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+glVertexAttribPointer(
+	2,                                // attribute
+	3,                                // size
+	GL_FLOAT,                         // type
+	GL_FALSE,                         // normalized?
+	0,                                // stride
+	(void*)0                          // array buffer offset
+);
 
-		// Swap buffers
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+// Draw the triangle
+glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
+glDisableVertexAttribArray(0);
+glDisableVertexAttribArray(1);
+
+// Swap buffers
+glfwSwapBuffers(window);
+glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
@@ -248,7 +249,7 @@ int main(int argc, char* argv[])
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &uvbuffer);
+	glDeleteBuffers(1, &colorbuffer);
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteProgram(programID);
 	glDeleteVertexArrays(1, &VertexArrayID);
@@ -258,5 +259,4 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
-
 */

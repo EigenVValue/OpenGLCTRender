@@ -13,6 +13,10 @@ GLFWwindow* window;
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/norm.hpp>
 using namespace glm;
 
 // Include common
@@ -20,14 +24,17 @@ using namespace glm;
 #include <loadOBJ.hpp>
 #include <controls.hpp>
 #include <getNormals.hpp>
+#include <quaternion_utils.hpp>
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 
+
 // The MAIN function
 int main(int argc, char* argv[])
 {
+	
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -75,6 +82,8 @@ int main(int argc, char* argv[])
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
 
+	float start = clock();
+
 	// Get a handle for "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
@@ -84,6 +93,7 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> colors;
 	std::vector<glm::vec3> normals;
+	float pivot[3] = {0.0f};
 
 	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
@@ -104,14 +114,28 @@ int main(int argc, char* argv[])
 
 	// Scale down
 	for (int i = 0; i < objVertices.size(); i++) {
-		objVertices[i].x = objVertices[i].x / 60;
+		objVertices[i].x = objVertices[i].x / 60 ;
 		objVertices[i].y = objVertices[i].y / 60;
 		objVertices[i].z = objVertices[i].z / 60;
 	}
 
 	// Get vertex
 	objVerticesToGLVertices(vertices, objVertices, objFaces);
-	
+
+	// Get pivot
+	for (int i = 0; i < vertices.size(); i++) {
+		pivot[0] += vertices[i].x;
+		pivot[1] += vertices[i].y;
+		pivot[2] += vertices[i].z;
+	}
+	pivot[0] /= vertices.size();
+	pivot[1] /= vertices.size();
+	pivot[2] /= vertices.size();
+	for (int i = 0; i < vertices.size(); i++) {
+		vertices[i].x -= pivot[0];
+		vertices[i].y -= pivot[1];
+		vertices[i].z -= pivot[2];
+	}
 
 	// Get normal
 	// Surface normal vector
@@ -147,7 +171,11 @@ int main(int argc, char* argv[])
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
+	float end = clock();
+	printf("%f%s", (end - start) / CLOCKS_PER_SEC, " seconds \n");
+
 	printf("Start rendering\n");
+
 	do {
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -155,12 +183,30 @@ int main(int argc, char* argv[])
 		// Use shader
 		glUseProgram(programID);
 
+		/*
+		// This is orientation way like FPS
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs(WIDTH, HEIGHT);
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
 		glm::mat4 ModelMatrix = glm::mat4(1.0);
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		*/
+
+		// Build MVP Matrix
+		computeMatricesFromInputs(WIDTH, HEIGHT);
+		mat4 ProjectionMatrix = getProjectionMatrix();
+		mat4 ViewMatrix = getViewMatrix();
+
+		// ModelMatrix
+		vec3 modelRotation = getModelRotation();
+		mat4 RotationMatrix = eulerAngleYXZ(modelRotation.y, modelRotation.x, modelRotation.z);
+		mat4 TranslationMatrix = translate(mat4(1.0f), getModelPosition());
+		mat4 ScalingMatrix = scale(mat4(1.0f), getModelScale());
+		mat4 ModelMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
+
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
 
 		// Send transformation to the currently bound shader, 
 		// in the "MVP" uniform
@@ -169,8 +215,8 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		// Let light postion go with view matrix
-		//glm::vec3 lightPos = getPosition();
-		glm::vec3 lightPos = vec3(3.0f, 5.0f, 5.0f);
+		glm::vec3 lightPos = vec3(4,4,4);
+		//glm::vec3 lightPos = vec3(3.0f, 5.0f, 5.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
 		// 1rst attribute buffer : vertices

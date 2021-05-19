@@ -5,7 +5,48 @@
 
 #include "getNormals.hpp"
 
+std::vector<glm::vec3> getVertexNormals(
+	const std::vector<glm::vec3> &objVertices,
+	const std::vector<unsigned int> &objFaces)
+{
+	std::vector<glm::vec3> normals;
+	std::unordered_map<int, glm::vec3> hashTable;
+	glm::vec3 *faceArr = new glm::vec3[objVertices.size()];
+	memset(faceArr, 0, sizeof(glm::vec3) * objVertices.size());
+
+	// Add surface normal vector
+	for (int i = 0; i < objFaces.size(); i += 3) {
+		glm::vec3 faceNorm = getNormal(
+			objVertices.at(objFaces.at(i) - 1),
+			objVertices.at(objFaces.at(i + 1) - 1),
+			objVertices.at(objFaces.at(i + 2) - 1))
+			* getArea(
+				objVertices.at(objFaces.at(i) - 1),
+				objVertices.at(objFaces.at(i + 1) - 1),
+				objVertices.at(objFaces.at(i + 2) - 1));
+
+		// Vertex 1
+		faceArr[objFaces.at(i)] += faceNorm;
+		// Vertex 2
+		faceArr[objFaces.at(i + 1)] += faceNorm;
+		// Vertex 3
+		faceArr[objFaces.at(i + 2)] += faceNorm;
+	}
+
+	// Build normals
+	for (int i = 0; i < objFaces.size(); i++)
+	{
+		glm::vec3 normal = faceArr[objFaces.at(i)];
+		normal = glm::normalize(normal);
+		normals.push_back(normal);
+	}
+
+	return normals;
+}
+
+
 // Get surface normal vector.
+// It seems we do not need to use this function.
 std::vector<glm::vec3> getNormals(
 	const std::vector<glm::vec3> &vertices)
 {
@@ -23,6 +64,26 @@ std::vector<glm::vec3> getNormals(
 	}
 	return normals;
 }
+
+glm::vec3 getNormal(const glm::vec3 &vertex1,
+	const glm::vec3 &vertex2, const glm::vec3 &vertex3)
+{
+	glm::vec3 normal;
+	// U = p2 - p1
+	// V = p3 - p1
+	// N = U X V
+	glm::vec3 vecU = vertex1 - vertex2;
+	glm::vec3 vecV = vertex1 - vertex3;
+	normal = glm::cross(vecU, vecV);
+
+
+	return normal;
+}
+
+/*
+/	This is function using hash table.
+/	It is slower than function using array
+
 
  glm::vec3 getNormal(const glm::vec3 &vertex1,
 	const glm::vec3 &vertex2, const glm::vec3 &vertex3)
@@ -89,6 +150,7 @@ std::vector<glm::vec3> getVertexNormals(
 
 	return normals;
 }
+*/
 
 int newMinus(int a, int b) {
 	if (a-b < 0) {
