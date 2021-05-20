@@ -1,9 +1,12 @@
-﻿  controls.cpp
+﻿  test.cpp
+d:\vs\project\openglctrender\demo\test.cpp(84): warning C4244: 'initializing': conversion from 'clock_t' to 'float', possible loss of data
+d:\vs\project\openglctrender\demo\test.cpp(173): warning C4244: 'initializing': conversion from 'clock_t' to 'float', possible loss of data
+d:\vs\project\openglctrender\demo\test.cpp(258): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  0 of 753 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  6 of 753 functions ( 0.8%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    15 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
 shader.obj : warning LNK4049: locally defined symbol __glewLinkProgram imported
 shader.obj : warning LNK4049: locally defined symbol __glewDeleteShader imported

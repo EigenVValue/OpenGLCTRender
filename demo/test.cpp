@@ -24,7 +24,6 @@ using namespace glm;
 #include <loadOBJ.hpp>
 #include <controls.hpp>
 #include <getNormals.hpp>
-#include <quaternion_utils.hpp>
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
