@@ -1,5 +1,5 @@
 #include <vector>
-#include <unordered_map>
+//#include <unordered_map>
 
 #include <glm/glm.hpp>
 
@@ -10,7 +10,6 @@ std::vector<glm::vec3> getVertexNormals(
 	const std::vector<unsigned int> &objFaces)
 {
 	std::vector<glm::vec3> normals;
-	std::unordered_map<int, glm::vec3> hashTable;
 	glm::vec3 *faceArr = new glm::vec3[objVertices.size()];
 	memset(faceArr, 0, sizeof(glm::vec3) * objVertices.size());
 
@@ -81,9 +80,8 @@ glm::vec3 getNormal(const glm::vec3 &vertex1,
 }
 
 /*
-/	This is function using hash table.
-/	It is slower than function using array
-
+**	This is function using hash table.
+**	It is slower than function using array
 
  glm::vec3 getNormal(const glm::vec3 &vertex1,
 	const glm::vec3 &vertex2, const glm::vec3 &vertex3)
@@ -152,23 +150,7 @@ std::vector<glm::vec3> getVertexNormals(
 }
 */
 
-int newMinus(int a, int b) {
-	if (a-b < 0) {
-		return 0;
-	} else {
-		return a - b;
-	}
-}
-int newAdd(int a, int b, int c) {
-	if (a + b > c) {
-		return c;
-	} else {
-		return a + b;
-	}
-}
-
-// Use Heron's formula to calculate
-// area of triangle
+// Use Heron's formula to calculate area of triangle
 float getArea(glm::vec3 vec1, glm::vec3 vec2, glm::vec3 vec3) {
 	// Heron's formula:
 	// L = (a+b+c)/2

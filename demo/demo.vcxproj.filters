@@ -33,9 +33,6 @@
     <ClCompile Include="getNormals.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="vboIndex.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="texture.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -59,9 +56,6 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="getNormals.hpp">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="vboIndex.hpp">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="texture.hpp">

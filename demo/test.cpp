@@ -30,10 +30,8 @@ const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 
 
-// The MAIN function
-int main(int argc, char* argv[])
-{
-	
+// MAIN function
+int main(int argc, char* argv[]) {
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -111,7 +109,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	// Scale down
+	// Scale down ***
 	for (int i = 0; i < objVertices.size(); i++) {
 		objVertices[i].x = objVertices[i].x / 60 ;
 		objVertices[i].y = objVertices[i].y / 60;
@@ -121,7 +119,7 @@ int main(int argc, char* argv[])
 	// Get vertex
 	objVerticesToGLVertices(vertices, objVertices, objFaces);
 
-	// Get pivot
+	// Get pivot ***
 	for (int i = 0; i < vertices.size(); i++) {
 		pivot[0] += vertices[i].x;
 		pivot[1] += vertices[i].y;
@@ -143,6 +141,7 @@ int main(int argc, char* argv[])
 	normals = getVertexNormals(objVertices,objFaces);
 
 	// Get color
+	// TEMP TEXTURE
 	for (int i = 0; i < vertices.size(); i++) {
 		vec3 temp_color;
 		temp_color.x = 0.502f;
@@ -173,8 +172,8 @@ int main(int argc, char* argv[])
 	float end = clock();
 	printf("%f%s", (end - start) / CLOCKS_PER_SEC, " seconds \n");
 
-	printf("Start rendering\n");
 
+	printf("Start rendering\n");
 	do {
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -193,6 +192,7 @@ int main(int argc, char* argv[])
 		*/
 
 		// Build MVP Matrix
+		// ProjectionMatrix & ViewMatrix
 		computeMatricesFromInputs(WIDTH, HEIGHT);
 		mat4 ProjectionMatrix = getProjectionMatrix();
 		mat4 ViewMatrix = getViewMatrix();
@@ -201,11 +201,10 @@ int main(int argc, char* argv[])
 		vec3 modelRotation = getModelRotation();
 		mat4 RotationMatrix = eulerAngleYXZ(modelRotation.y, modelRotation.x, modelRotation.z);
 		mat4 TranslationMatrix = translate(mat4(1.0f), getModelPosition());
-		mat4 ScalingMatrix = scale(mat4(1.0f), getModelScale());
+		mat4 ScalingMatrix = scale(mat4(1.0f), getModelScaling());
 		mat4 ModelMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
 
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-
 
 		// Send transformation to the currently bound shader, 
 		// in the "MVP" uniform
@@ -213,9 +212,8 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-		// Let light postion go with view matrix
-		glm::vec3 lightPos = vec3(4,4,4);
-		//glm::vec3 lightPos = vec3(3.0f, 5.0f, 5.0f);
+		// Set light postion
+		glm::vec3 lightPos = vec3(4.0f,4.0f,4.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
 		// 1rst attribute buffer : vertices

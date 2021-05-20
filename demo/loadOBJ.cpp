@@ -1,7 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <vector>
 #include <stdio.h>
-#include <string>
 #include <iostream>
 
 #include <glm/glm.hpp>
