@@ -14,6 +14,10 @@ GLFWwindow* window;
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/norm.hpp>
 using namespace glm;
 
 // Include common
@@ -26,16 +30,15 @@ using namespace glm;
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 
-// Rotation
-vec3 gOrientation1;
 
-// The MAIN function
-int main(int argc, char* argv[])
-{
+// MAIN function
+int main(int argc, char* argv[]) {
 
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
+	glfwWindowHint(GLFW_SAMPLES, 16);
+	glEnable(GL_MULTISAMPLE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
@@ -77,10 +80,11 @@ int main(int argc, char* argv[])
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
+
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
 
-	float start = clock();
+
 
 	// Get a handle for "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
@@ -96,7 +100,8 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec3> objVertices;
 	std::vector<unsigned int> objFaces;
 
-	// Load obj
+	float start = clock();
+	// Load obj ***
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
@@ -108,16 +113,13 @@ int main(int argc, char* argv[])
 			return 0;
 		}
 	}
+	float end = clock();
+	printf("%f", (end - start) / CLOCKS_PER_SEC);
 
-	// Scale down
-	for (int i = 0; i < objVertices.size(); i++) {
-		objVertices[i].x = objVertices[i].x / 60;
-		objVertices[i].y = objVertices[i].y / 60;
-		objVertices[i].z = objVertices[i].z / 60;
-	}
 
 	// Get vertex
 	objVerticesToGLVertices(vertices, objVertices, objFaces);
+
 
 	// Get normal
 	// Surface normal vector
@@ -125,7 +127,9 @@ int main(int argc, char* argv[])
 	// Vertex normal vector
 	normals = getVertexNormals(objVertices,objFaces);
 
+
 	// Get color
+	// TEMP TEXTURE
 	for (int i = 0; i < vertices.size(); i++) {
 		vec3 temp_color;
 		temp_color.x = 0.502f;
@@ -153,8 +157,8 @@ int main(int argc, char* argv[])
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
-	float end = clock();
-	printf("%f%s", (end - start) / CLOCKS_PER_SEC, " seconds \n");
+
+
 
 	printf("Start rendering\n");
 	do {
@@ -164,84 +168,79 @@ int main(int argc, char* argv[])
 		// Use shader
 		glUseProgram(programID);
 
-		/*
-		/ This is orientation
-		// Compute the MVP matrix from keyboard and mouse input
+		// Build MVP Matrix
+		// ProjectionMatrix & ViewMatrix
 		computeMatricesFromInputs(WIDTH, HEIGHT);
-		glm::mat4 ProjectionMatrix = getProjectionMatrix();
-		glm::mat4 ViewMatrix = getViewMatrix();
-		glm::mat4 ModelMatrix = glm::mat4(1.0);
+		mat4 ProjectionMatrix = getProjectionMatrix();
+		mat4 ViewMatrix = getViewMatrix();
+
+		// ModelMatrix
+		vec3 modelRotation = getModelRotation();
+		// Quaternion is better than Euler Angle
+		mat4 RotationMatrix = eulerAngleYXZ(modelRotation.y, modelRotation.x, modelRotation.z);
+		mat4 TranslationMatrix = translate(mat4(1.0f), getModelPosition());
+		mat4 ScalingMatrix = scale(mat4(1.0f), getModelScaling());
+		mat4 ModelMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
+
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-		
 
-		// Euler
-		// As an example, rotate arount the vertical axis at 180?sec
-gOrientation1.y += 3.14159f / 2.0f * deltaTime;
+		// Send transformation to the currently bound shader,
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-// Build the model matrix
-glm::mat4 RotationMatrix = eulerAngleYXZ(gOrientation1.y, gOrientation1.x, gOrientation1.z);
-glm::mat4 TranslationMatrix = translate(mat4(), gPosition1); // A bit to the left
-glm::mat4 ScalingMatrix = scale(mat4(), vec3(1.0f, 1.0f, 1.0f));
-glm::mat4 ModelMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;
+		// Set light postion
+		glm::vec3 lightPos = vec3(4.0f,4.0f,4.0f);
+		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
-glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-// Send transformation to the currently bound shader, 
-// in the "MVP" uniform
-glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
-glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glVertexAttribPointer(
+			0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
 
-// Let light postion go with view matrix
-//glm::vec3 lightPos = getPosition();
-glm::vec3 lightPos = vec3(3.0f, 5.0f, 5.0f);
-glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+		// 2nd attribute buffer : colors
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+		glVertexAttribPointer(
+			1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+			3,                                // size
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
+		);
 
-// 1rst attribute buffer : vertices
-glEnableVertexAttribArray(0);
-glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-glVertexAttribPointer(
-	0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-	3,                  // size
-	GL_FLOAT,           // type
-	GL_FALSE,           // normalized?
-	0,                  // stride
-	(void*)0            // array buffer offset
-);
+		// 3rd attribute buffer : normals
+		glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+		glVertexAttribPointer(
+			2,                                // attribute
+			3,                                // size
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
+		);
 
-// 2nd attribute buffer : colors
-glEnableVertexAttribArray(1);
-glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-glVertexAttribPointer(
-	1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-	3,                                // size
-	GL_FLOAT,                         // type
-	GL_FALSE,                         // normalized?
-	0,                                // stride
-	(void*)0                          // array buffer offset
-);
 
-// 3rd attribute buffer : normals
-glEnableVertexAttribArray(2);
-glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-glVertexAttribPointer(
-	2,                                // attribute
-	3,                                // size
-	GL_FLOAT,                         // type
-	GL_FALSE,                         // normalized?
-	0,                                // stride
-	(void*)0                          // array buffer offset
-);
+		// Draw the triangle
+		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
-// Draw the triangle
-glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
 
-glDisableVertexAttribArray(0);
-glDisableVertexAttribArray(1);
-
-// Swap buffers
-glfwSwapBuffers(window);
-glfwPollEvents();
+		// Swap buffers
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&

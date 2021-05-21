@@ -168,7 +168,7 @@
     <ClInclude Include="texture.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="code.txt" />
+    <Text Include="texture.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

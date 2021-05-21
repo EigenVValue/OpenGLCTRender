@@ -38,4 +38,5 @@ TODO:
 [x] get normal vector (surface normal)  
 [ ] get UV coordinate  
 [x] make better shading  
-[ ] add shadow  
+[ ] add shadow    
+[ ] add quaternions

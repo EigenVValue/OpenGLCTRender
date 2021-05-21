@@ -13,7 +13,7 @@ glm::mat4 ProjectionMatrix;
 // Initial position :
 glm::vec3 modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 modelRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 modelScaling = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::vec3 modelScaling = glm::vec3(0.03f, 0.03f, 0.03f);
 
 
 glm::mat4 getViewMatrix() {
@@ -38,7 +38,7 @@ float horizontalAngle = 0.01f;
 float verticalAngle = 0.01f;
 
 float speed = 3.0f; // 3 units per second
-float mouseSpeed = 0.0005f;
+float mouseSpeed = 0.001f;
 bool click = false;
 
 void computeMatricesFromInputs(const int WIDTH, const int HEIGHT) {
@@ -106,5 +106,7 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
 	}
 }
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-	modelScaling += yoffset*0.05;
+	if (modelScaling.x + yoffset * 0.0005 > 0.0f) { // Set minimum scale coefficient
+		modelScaling += yoffset * 0.0005;
+	}
 }

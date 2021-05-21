@@ -32,15 +32,18 @@ const GLuint  HEIGHT = 768;
 
 // MAIN function
 int main(int argc, char* argv[]) {
+	float start = clock();
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
+	glfwWindowHint(GLFW_SAMPLES, 16);
+	glEnable(GL_MULTISAMPLE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
+	
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	window = glfwCreateWindow(WIDTH, HEIGHT, "demo", nullptr, nullptr);
 	if (window == NULL) {
@@ -50,7 +53,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-
+	
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -75,11 +78,12 @@ int main(int argc, char* argv[]) {
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
-
+	
+	
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
 
-	float start = clock();
+	
 
 	// Get a handle for "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
@@ -90,12 +94,12 @@ int main(int argc, char* argv[]) {
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> colors;
 	std::vector<glm::vec3> normals;
-	float pivot[3] = {0.0f};
 
 	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
 	std::vector<unsigned int> objFaces;
 
+	
 	// Load obj
 	{
 		std::filesystem::path currPath = argv[0];
@@ -108,37 +112,19 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 	}
+	
 
-	// Scale down ***
-	for (int i = 0; i < objVertices.size(); i++) {
-		objVertices[i].x = objVertices[i].x / 60 ;
-		objVertices[i].y = objVertices[i].y / 60;
-		objVertices[i].z = objVertices[i].z / 60;
-	}
-
+	
 	// Get vertex
 	objVerticesToGLVertices(vertices, objVertices, objFaces);
-
-	// Get pivot ***
-	for (int i = 0; i < vertices.size(); i++) {
-		pivot[0] += vertices[i].x;
-		pivot[1] += vertices[i].y;
-		pivot[2] += vertices[i].z;
-	}
-	pivot[0] /= vertices.size();
-	pivot[1] /= vertices.size();
-	pivot[2] /= vertices.size();
-	for (int i = 0; i < vertices.size(); i++) {
-		vertices[i].x -= pivot[0];
-		vertices[i].y -= pivot[1];
-		vertices[i].z -= pivot[2];
-	}
-
+	
+	
 	// Get normal
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
 	normals = getVertexNormals(objVertices,objFaces);
+
 
 	// Get color
 	// TEMP TEXTURE
@@ -169,9 +155,9 @@ int main(int argc, char* argv[]) {
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
-	float end = clock();
-	printf("%f%s", (end - start) / CLOCKS_PER_SEC, " seconds \n");
 
+	float end = clock();
+	printf("%f", (end - start) / CLOCKS_PER_SEC);
 
 	printf("Start rendering\n");
 	do {
@@ -181,16 +167,6 @@ int main(int argc, char* argv[]) {
 		// Use shader
 		glUseProgram(programID);
 
-		/*
-		// This is orientation way like FPS
-		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs(WIDTH, HEIGHT);
-		glm::mat4 ProjectionMatrix = getProjectionMatrix();
-		glm::mat4 ViewMatrix = getViewMatrix();
-		glm::mat4 ModelMatrix = glm::mat4(1.0);
-		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-		*/
-
 		// Build MVP Matrix
 		// ProjectionMatrix & ViewMatrix
 		computeMatricesFromInputs(WIDTH, HEIGHT);
@@ -199,6 +175,7 @@ int main(int argc, char* argv[]) {
 
 		// ModelMatrix
 		vec3 modelRotation = getModelRotation();
+		// Quaternion is better than Euler Angle
 		mat4 RotationMatrix = eulerAngleYXZ(modelRotation.y, modelRotation.x, modelRotation.z);
 		mat4 TranslationMatrix = translate(mat4(1.0f), getModelPosition());
 		mat4 ScalingMatrix = scale(mat4(1.0f), getModelScaling());
@@ -215,6 +192,7 @@ int main(int argc, char* argv[]) {
 		// Set light postion
 		glm::vec3 lightPos = vec3(4.0f,4.0f,4.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -251,6 +229,7 @@ int main(int argc, char* argv[]) {
 			0,                                // stride
 			(void*)0                          // array buffer offset
 		);
+
 
 		// Draw the triangle
 		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
