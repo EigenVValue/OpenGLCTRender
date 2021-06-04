@@ -6,33 +6,31 @@ in vec3 Position_worldspace;
 in vec3 Normal_cameraspace;
 in vec3 EyeDirection_cameraspace;
 in vec3 LightDirection_cameraspace;
+in vec3 LightDirection_cameraspace2;
+in vec3 LightDirection_cameraspace3;
 
 // Ouput data
 out vec3 color;
 
 // Values that stay constant for the whole mesh.
-uniform mat4 MV;
 uniform vec3 LightPosition_worldspace;
+uniform vec3 LightPosition_worldspace2;
+uniform vec3 LightPosition_worldspace3;
 
-void main(){
+vec3 calLight(vec3 LightDirection_cameraspace,
+	vec3 LightPosition_worldspace) 
+{
 	// Light emission properties
 	vec3 LightColor = vec3(0.5,0.5,0.5);
 	float LightPower = 20.0f;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(0.5,0.5,0.5);
-	vec3 MaterialAmbientColor = vec3(0.8,0.8,0.8);
 	vec3 MaterialSpecularColor = vec3(0.05,0.05,0.05);
-
-	// Global ambient light:
-	vec3 global_amb = vec3(0.1, 0.1, 0.1); // a weak white light
-
-	// Ambient
-	vec3 ambient = MaterialAmbientColor * LightColor;
 
 	// Distance to the light
 	// Use for simple light source attenuation
-	float distance = length(LightPosition_worldspace - Position_worldspace);
+	float distance = length(LightPosition_worldspace - Position_worldspace) /2;
 
 	// Normal vector at point (normalized)
 	vec3 n = normalize( Normal_cameraspace );
@@ -59,7 +57,24 @@ void main(){
 	float cosAlpha = clamp( dot(v,r), 0,1 );
 
 	// Specular : ks * Ls * (v.r)^n * att
-	vec3 specular = MaterialSpecularColor * (LightColor) * pow(cosAlpha,130) / (distance*distance);
+	vec3 specular = MaterialSpecularColor * (LightColor) * pow(cosAlpha,10) / (distance*distance);
 	
-	color = global_amb + ambient + diffuse + specular;
+	return diffuse + specular;
+}
+
+void main(){
+	// Light emission properties
+	vec3 LightColor = vec3(0.5,0.5,0.5);
+
+	// Material properties
+	vec3 MaterialAmbientColor = vec3(0.8,0.8,0.8);
+
+	// Ambient
+	vec3 ambient = MaterialAmbientColor * LightColor;
+
+	vec3 result = calLight(LightDirection_cameraspace, LightPosition_worldspace);
+	result = result + calLight(LightDirection_cameraspace2, LightPosition_worldspace2);
+	result = result + calLight(LightDirection_cameraspace3, LightPosition_worldspace3);
+	
+	color = ambient + result;
 }

@@ -154,6 +154,8 @@ int main(int argc, char* argv[]) {
 	// Get a handle for "LightPosition" uniform
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
+	GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
+	GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
 
 
 	float end = clock();
@@ -192,6 +194,10 @@ int main(int argc, char* argv[]) {
 		// Set light postion
 		glm::vec3 lightPos = vec3(4.0f,4.0f,4.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+		glm::vec3 lightPos2 = vec3(-4.0f, 4.0f, 4.0f);
+		glUniform3f(LightID, lightPos2.x, lightPos2.y, lightPos2.z);
+		glm::vec3 lightPos3 = vec3(0.0f, 0.0f, 10.0f);
+		glUniform3f(LightID, lightPos3.x, lightPos3.y, lightPos3.z);
 
 
 		// 1rst attribute buffer : vertices
