@@ -40,3 +40,4 @@ TODO:
 [x] make better shading  
 [ ] add shadow    
 [ ] add quaternions
+[ ] add FOV control

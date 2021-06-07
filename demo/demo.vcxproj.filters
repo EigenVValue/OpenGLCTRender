@@ -36,6 +36,9 @@
     <ClCompile Include="texture.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="controlsForFOV.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fShader.fragmentshader">
@@ -59,6 +62,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="texture.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="controlsForFOV.hpp">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

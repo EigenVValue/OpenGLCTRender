@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="controls.cpp" />
+    <ClCompile Include="controlsForFOV.cpp" />
     <ClCompile Include="demo.cpp" />
     <ClCompile Include="getNormals.cpp" />
     <ClCompile Include="loadOBJ.cpp" />
@@ -162,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="controls.hpp" />
+    <ClInclude Include="controlsForFOV.hpp" />
     <ClInclude Include="getNormals.hpp" />
     <ClInclude Include="loadOBJ.hpp" />
     <ClInclude Include="shader.hpp" />

@@ -26,11 +26,11 @@ vec3 calLight(vec3 LightDirection_cameraspace,
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(0.5,0.5,0.5);
-	vec3 MaterialSpecularColor = vec3(0.05,0.05,0.05);
+	vec3 MaterialSpecularColor = vec3(0.1,0.1,0.1);
 
 	// Distance to the light
 	// Use for simple light source attenuation
-	float distance = length(LightPosition_worldspace - Position_worldspace) /2;
+	float distance = length(LightPosition_worldspace - Position_worldspace);
 
 	// Normal vector at point (normalized)
 	vec3 n = normalize( Normal_cameraspace );

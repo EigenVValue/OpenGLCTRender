@@ -192,11 +192,11 @@ int main(int argc, char* argv[]) {
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		// Set light postion
-		glm::vec3 lightPos = vec3(4.0f,4.0f,4.0f);
+		glm::vec3 lightPos = vec3(-10.0f, 5.0f, 5.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
-		glm::vec3 lightPos2 = vec3(-4.0f, 4.0f, 4.0f);
+		glm::vec3 lightPos2 = vec3(10.0f, 5.0f, 5.0f);
 		glUniform3f(LightID, lightPos2.x, lightPos2.y, lightPos2.z);
-		glm::vec3 lightPos3 = vec3(0.0f, 0.0f, 10.0f);
+		glm::vec3 lightPos3 = vec3(0.0f, -12.36f, -4.0f);
 		glUniform3f(LightID, lightPos3.x, lightPos3.y, lightPos3.z);
 
 
