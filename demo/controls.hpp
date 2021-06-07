@@ -1,3 +1,5 @@
+/*
+
 #ifndef CONTROLS_HPP
 #define CONTROLS_HPP
 
@@ -13,3 +15,5 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 #endif
+
+*/

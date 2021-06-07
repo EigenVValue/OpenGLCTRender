@@ -22,13 +22,13 @@ using namespace glm;
 // Include common
 #include <shader.hpp>
 #include <loadOBJ.hpp>
-#include <controls.hpp>
+//#include <controls.hpp>
+#include <controlsForFOV.hpp>
 #include <getNormals.hpp>
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
-
 
 // MAIN function
 int main(int argc, char* argv[]) {
@@ -195,9 +195,9 @@ int main(int argc, char* argv[]) {
 		glm::vec3 lightPos = vec3(-10.0f, 5.0f, 5.0f);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 		glm::vec3 lightPos2 = vec3(10.0f, 5.0f, 5.0f);
-		glUniform3f(LightID, lightPos2.x, lightPos2.y, lightPos2.z);
+		glUniform3f(LightID2, lightPos2.x, lightPos2.y, lightPos2.z);
 		glm::vec3 lightPos3 = vec3(0.0f, -12.36f, -4.0f);
-		glUniform3f(LightID, lightPos3.x, lightPos3.y, lightPos3.z);
+		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
 
 
 		// 1rst attribute buffer : vertices

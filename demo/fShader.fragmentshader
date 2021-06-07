@@ -21,21 +21,21 @@ vec3 calLight(vec3 LightDirection_cameraspace,
 	vec3 LightPosition_worldspace) 
 {
 	// Light emission properties
-	vec3 LightColor = vec3(0.5,0.5,0.5);
+	vec3 LightColor = vec3(1.0,1.0,1.0);
 	float LightPower = 20.0f;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(0.5,0.5,0.5);
-	vec3 MaterialSpecularColor = vec3(0.1,0.1,0.1);
+	vec3 MaterialSpecularColor = vec3(0.2,0.2,0.2);
 
-	// Distance to the light
 	// Use for simple light source attenuation
-	float distance = length(LightPosition_worldspace - Position_worldspace);
+	// Atten = 1 / (2*d)^2
+	float distance = length(LightPosition_worldspace - Position_worldspace) / 2;
 
 	// Normal vector at point (normalized)
-	vec3 n = normalize( Normal_cameraspace );
+	vec3 n = normalize(Normal_cameraspace);
 	// Light source vector (normalized)
-	vec3 l = normalize( LightDirection_cameraspace );
+	vec3 l = normalize(LightDirection_cameraspace);
 	// Cosine of the angle between the normal and the light direction, 
 	// clamped above 0
 	//  - light is at the vertical of the triangle -> 1
@@ -43,7 +43,7 @@ vec3 calLight(vec3 LightDirection_cameraspace,
 	//  - light is behind the triangle -> 0
 	float cosTheta = clamp( dot(n,l), 0,1 );
 
-	// Diffuse : kd * Ld * (n.l) * att
+	// Diffuse : kd * Ld * (n.l) * atten
 	vec3 diffuse = MaterialDiffuseColor * (LightColor * LightPower) * cosTheta / (distance*distance);
 
 	// Eye vector (towards the camera)
@@ -62,19 +62,21 @@ vec3 calLight(vec3 LightDirection_cameraspace,
 	return diffuse + specular;
 }
 
-void main(){
-	// Light emission properties
-	vec3 LightColor = vec3(0.5,0.5,0.5);
-
-	// Material properties
-	vec3 MaterialAmbientColor = vec3(0.8,0.8,0.8);
-
+void main()
+{
 	// Ambient
+	// Light emission properties
+	vec3 LightColor = vec3(1.0,1.0,1.0);
+	// Material properties
+	vec3 MaterialAmbientColor = vec3(0.5,0.5,0.5);
+
 	vec3 ambient = MaterialAmbientColor * LightColor;
 
+	// Three light point
 	vec3 result = calLight(LightDirection_cameraspace, LightPosition_worldspace);
 	result = result + calLight(LightDirection_cameraspace2, LightPosition_worldspace2);
 	result = result + calLight(LightDirection_cameraspace3, LightPosition_worldspace3);
 	
+	// Frag color
 	color = ambient + result;
 }

@@ -1,3 +1,5 @@
+/*
+
 // Include GLFW
 #include <GLFW/glfw3.h>
 extern GLFWwindow* window; 
@@ -14,7 +16,6 @@ glm::mat4 ProjectionMatrix;
 glm::vec3 modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 modelRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 modelScaling = glm::vec3(0.03f, 0.03f, 0.03f);
-
 
 glm::mat4 getViewMatrix() {
 	return ViewMatrix;
@@ -110,3 +111,5 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 		modelScaling += yoffset * 0.0005;
 	}
 }
+
+*/
