@@ -13,8 +13,8 @@ dependencies folder includes GLFW, GLEW and GLM.
 
 How to plat:  
 You can choose 
-<font color=#0099ff face="Arial">controls.cpp</font>. It rotates model so you can see immersive light.  
-$\color{#00FFFF}{controlsForFOV.cpp}$ rotates the view matrix so it is much faster to run than controls. But light will not change.  
+<font color=#00FFFF>controls.cpp</font>. It rotates model so you can see immersive light.  
+<font color=#00FFFF>controlsForFOV.cpp</font> rotates the view matrix so it is much faster to run than controls. But light will not change.  
 Scroll mouse to scale view Matrix.  
 Click the mouse and move it to rotate your point of view.  
 ↑↓←→ up, down, left and right. (Not available now)  
