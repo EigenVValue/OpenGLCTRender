@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
-	// Set vertex, color and normal
+	// Set vertices, uvs and normals
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;

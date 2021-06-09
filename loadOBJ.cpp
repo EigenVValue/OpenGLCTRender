@@ -20,8 +20,7 @@ bool loadOBJ(const char* path, std::vector<glm::vec3> & objVertices,
 	FILE * file;
 	fopen_s(&file, path, "r");
 	if (file == NULL) {
-		printf("Impossible to open the file !\n");
-		getchar();
+		printf("%s could not be opened. Are you in the right directory ? \n", path); getchar();
 		return false;
 	}
 
