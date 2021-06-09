@@ -8,6 +8,8 @@ layout(location = 2) in vec3 vertexNormal_modelspace;
 
 // Output data ; will be interpolated for each fragment.
 out vec3 fragmentColor;
+out vec4 ShadowCoord;
+
 out vec3 Position_worldspace;
 out vec3 Normal_cameraspace;
 out vec3 EyeDirection_cameraspace;
@@ -19,6 +21,7 @@ out vec3 LightDirection_cameraspace3;
 uniform mat4 MVP;
 uniform mat4 V;
 uniform mat4 M;
+uniform mat4 DepthBiasMVP;
 uniform vec3 LightPosition_worldspace;
 uniform vec3 LightPosition_worldspace2;
 uniform vec3 LightPosition_worldspace3;
@@ -48,6 +51,9 @@ void main(){
 	// Normal of the the vertex, in camera space
 	// Only correct if ModelMatrix does not scale the model ! Use its inverse transpose if not.
 	Normal_cameraspace = ( V * M * vec4(vertexNormal_modelspace,0)).xyz; 
+
+	// Set shadow coordinate
+	ShadowCoord = DepthBiasMVP * vec4(vertexPosition_modelspace,1);
 
 	// The color of each vertex will be interpolated
 	// to produce the color of each fragment

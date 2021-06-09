@@ -32,8 +32,8 @@ glm::vec3 getModelScaling() {
 }
 
 // Initial position & up:
-glm::vec4 position = glm::vec4(0, 0, 15, 1);
-glm::vec4 up = glm::vec4(0, 2, 15, 1);
+glm::vec4 position = glm::vec4(0, 0, -15, 1);
+glm::vec4 up = glm::vec4(0, 2, -15, 1);
 // Initial horizontal angle : none
 float horizontalAngle = 0.0f;
 // Initial vertical angle : none

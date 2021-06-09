@@ -2,6 +2,8 @@
 
 // Interpolated values from the vertex shaders
 in vec3 fragmentColor;
+in vec4 ShadowCoord;
+
 in vec3 Position_worldspace;
 in vec3 Normal_cameraspace;
 in vec3 EyeDirection_cameraspace;
@@ -10,7 +12,7 @@ in vec3 LightDirection_cameraspace2;
 in vec3 LightDirection_cameraspace3;
 
 // Ouput data
-out vec3 color;
+layout(location = 0) out vec3 color;
 
 // Values that stay constant for the whole mesh.
 uniform vec3 LightPosition_worldspace;
@@ -18,18 +20,18 @@ uniform vec3 LightPosition_worldspace2;
 uniform vec3 LightPosition_worldspace3;
 
 vec3 calLight(vec3 LightDirection_cameraspace,
-	vec3 LightPosition_worldspace) 
+	vec3 LightPosition_worldspace,
+	float LightPower) 
 {
 	// Light emission properties
 	vec3 LightColor = vec3(1.0,1.0,1.0);
-	float LightPower = 20.0f;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(0.5,0.5,0.5);
 	vec3 MaterialSpecularColor = vec3(0.2,0.2,0.2);
 
 	// Use for simple light source attenuation
-	// Atten = 1 / (2*d)^2
+	// Atten = 1 / d^2
 	float distance = length(LightPosition_worldspace - Position_worldspace) / 2;
 
 	// Normal vector at point (normalized)
@@ -68,14 +70,17 @@ void main()
 	// Light emission properties
 	vec3 LightColor = vec3(1.0,1.0,1.0);
 	// Material properties
-	vec3 MaterialAmbientColor = vec3(0.5,0.5,0.5);
+	vec3 MaterialAmbientColor = vec3(0.2,0.2,0.2);
 
 	vec3 ambient = MaterialAmbientColor * LightColor;
 
 	// Three light point
-	vec3 result = calLight(LightDirection_cameraspace, LightPosition_worldspace);
-	result = result + calLight(LightDirection_cameraspace2, LightPosition_worldspace2);
-	result = result + calLight(LightDirection_cameraspace3, LightPosition_worldspace3);
+	// Side light with light power 180 & 120 (in 255).
+	vec3 result = calLight(LightDirection_cameraspace, LightPosition_worldspace, 180f);
+	result = result + calLight(LightDirection_cameraspace2, LightPosition_worldspace2, 120f);
+
+	// Back light with light power 60 (in 255).
+	result = result + calLight(LightDirection_cameraspace3, LightPosition_worldspace3, 60f);
 	
 	// Frag color
 	color = ambient + result;

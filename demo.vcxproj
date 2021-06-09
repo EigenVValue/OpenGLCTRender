@@ -152,19 +152,25 @@
     <ClCompile Include="controlsForFOV.cpp" />
     <ClCompile Include="demo.cpp" />
     <ClCompile Include="getNormals.cpp" />
+    <ClCompile Include="getUVs.cpp" />
     <ClCompile Include="loadOBJ.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DepthRTT.fragmentshader" />
+    <None Include="DepthRTT.vertexshader" />
     <None Include="fShader.fragmentshader" />
+    <None Include="Passthrough.vertexshader" />
+    <None Include="SimpleTexture.fragmentshader" />
     <None Include="vShader.vertexshader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="controls.hpp" />
     <ClInclude Include="controlsForFOV.hpp" />
     <ClInclude Include="getNormals.hpp" />
+    <ClInclude Include="getUVs.hpp" />
     <ClInclude Include="loadOBJ.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="texture.hpp" />

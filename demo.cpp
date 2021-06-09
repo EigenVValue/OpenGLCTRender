@@ -1,4 +1,3 @@
-/*
 // Include standard liabraries
 #include <vector>
 #include <filesystem>
@@ -23,17 +22,17 @@ using namespace glm;
 // Include common
 #include <shader.hpp>
 #include <loadOBJ.hpp>
-#include <controls.hpp>
+//#include <controls.hpp>
+#include <controlsForFOV.hpp>
 #include <getNormals.hpp>
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 
-
 // MAIN function
 int main(int argc, char* argv[]) {
-
+	float start = clock();
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -44,7 +43,7 @@ int main(int argc, char* argv[]) {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
+	
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	window = glfwCreateWindow(WIDTH, HEIGHT, "demo", nullptr, nullptr);
 	if (window == NULL) {
@@ -54,7 +53,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-
+	
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -80,17 +79,6 @@ int main(int argc, char* argv[]) {
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
-
-	// Create and compile GLSL program from the shaders
-	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
-
-
-
-	// Get a handle for "MVP" uniform
-	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
-	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
-
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> colors;
@@ -100,8 +88,8 @@ int main(int argc, char* argv[]) {
 	std::vector<glm::vec3> objVertices;
 	std::vector<unsigned int> objFaces;
 
-	float start = clock();
-	// Load obj ***
+	
+	// Load obj
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
@@ -113,20 +101,15 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 	}
-	float end = clock();
-	printf("%f", (end - start) / CLOCKS_PER_SEC);
-
-
+	
 	// Get vertex
 	objVerticesToGLVertices(vertices, objVertices, objFaces);
-
-
+	
 	// Get normal
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
 	normals = getVertexNormals(objVertices,objFaces);
-
 
 	// Get color
 	// TEMP TEXTURE
@@ -153,15 +136,23 @@ int main(int argc, char* argv[]) {
 	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 
+	// Create and compile GLSL program from the shaders
+	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
+
+	// Get a handle for "MVP" uniform
+	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
+	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
+
 	// Get a handle for "LightPosition" uniform
-	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
+	GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
+	GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
 
 
-
-
-	printf("Start rendering\n");
+	//printf("Start rendering\n");
 	do {
+
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -184,16 +175,23 @@ int main(int argc, char* argv[]) {
 
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		// Send transformation to the currently bound shader,
+		// Send transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		// Set light postion
-		glm::vec3 lightPos = vec3(4.0f,4.0f,4.0f);
+		// Side light
+		float sideZ = -11.0f;
+		float sideX = sideZ * sqrt(3.0f);
+		glm::vec3 lightPos = vec3(sideX, 0.0f, sideZ);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
-
+		glm::vec3 lightPos2 = vec3(-sideX, 0.0f, sideZ);
+		glUniform3f(LightID2, lightPos2.x, lightPos2.y, lightPos2.z);
+		// Back light
+		glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
+		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -237,6 +235,7 @@ int main(int argc, char* argv[]) {
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
 
 		// Swap buffers
 		glfwSwapBuffers(window);
@@ -258,4 +257,3 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
-*/
