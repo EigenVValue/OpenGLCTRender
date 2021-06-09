@@ -1,5 +1,4 @@
 /*
-
 // Include standard liabraries
 #include <vector>
 #include <filesystem>
@@ -27,6 +26,8 @@ using namespace glm;
 //#include <controls.hpp>
 #include <controlsForFOV.hpp>
 #include <getNormals.hpp>
+#include <texture.hpp>
+#include <getUVs.hpp>
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
@@ -45,7 +46,7 @@ int main(int argc, char* argv[]) {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	
+
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	window = glfwCreateWindow(WIDTH, HEIGHT, "demo", nullptr, nullptr);
 	if (window == NULL) {
@@ -55,7 +56,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	
+
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -83,14 +84,13 @@ int main(int argc, char* argv[]) {
 
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> colors;
+	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
 	// Get vertex via loading obj file
 	std::vector<glm::vec3> objVertices;
 	std::vector<unsigned int> objFaces;
 
-	
 	// Load obj
 	{
 		std::filesystem::path currPath = argv[0];
@@ -103,35 +103,27 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 	}
-	
+
 	// Get vertex
 	objVerticesToGLVertices(vertices, objVertices, objFaces);
-	
+
 	// Get normal
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
-	normals = getVertexNormals(objVertices,objFaces);
+	normals = getVertexNormals(objVertices, objFaces);
 
-	// Get color
-	// TEMP TEXTURE
-	for (int i = 0; i < vertices.size(); i++) {
-		vec3 temp_color;
-		temp_color.x = 0.502f;
-		temp_color.y = 0.502f;
-		temp_color.z = 0.502f;
-		colors.push_back(temp_color);
-	}
+	getUVs(vertices, vec3(1, 0, 0), uvs);
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint colorbuffer;
-	glGenBuffers(1, &colorbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);
@@ -151,6 +143,18 @@ int main(int argc, char* argv[]) {
 	GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
 	GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
 
+	// Load DDS
+	GLuint Texture;
+	{
+		std::filesystem::path currPath = argv[0];
+		currPath = currPath.parent_path();
+		currPath += "\\img\\uvmap.DDS";
+		char* path = currPath.string().data();
+		Texture = loadDDS(path);
+	}
+
+	// Get a handle for our "myTextureSampler" uniform
+	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 
 	//printf("Start rendering\n");
 	do {
@@ -177,7 +181,7 @@ int main(int argc, char* argv[]) {
 
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		// Send transformation to the currently bound shader, 
+		// Send transformation to the currently bound shader,
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
@@ -195,6 +199,12 @@ int main(int argc, char* argv[]) {
 		glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
 		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
 
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Texture);
+		// Set our "myTextureSampler" sampler to use Texture Unit 0
+		glUniform1i(TextureID, 0);
+
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -207,12 +217,12 @@ int main(int argc, char* argv[]) {
 			(void*)0            // array buffer offset
 		);
 
-		// 2nd attribute buffer : colors
+		// 2nd attribute buffer : UVs
 		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 		glVertexAttribPointer(
 			1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-			3,                                // size
+			2,                                // size : U+V => 2
 			GL_FLOAT,                         // type
 			GL_FALSE,                         // normalized?
 			0,                                // stride
@@ -249,7 +259,7 @@ int main(int argc, char* argv[]) {
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &colorbuffer);
+	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteProgram(programID);
 	glDeleteVertexArrays(1, &VertexArrayID);
@@ -259,5 +269,6 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+
 
 */

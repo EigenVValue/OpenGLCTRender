@@ -38,10 +38,10 @@ Rendering:
 
 TODO:  
 [x] add light  
-[ ] add texture  
+[x] add texture  
 [x] get normal vector (surface normal)  
-[ ] get UV coordinate  
+[x] ~~get UV coordinate~~ add UV coordinate by myself  
 [x] make better shading  
 [ ] add shadow    
-[ ] add quaternions  
-[X] add FOV control  
+[ ] add quaternions   
+[X] add FOV control   
