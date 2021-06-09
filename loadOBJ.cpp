@@ -13,7 +13,8 @@
  */
 
 bool loadOBJ(const char* path, std::vector<glm::vec3> & objVertices,
-	std::vector<unsigned int> & objFaces) {
+	std::vector<unsigned int> & objFaces) 
+{
 	printf("Loading OBJ file %s...\n", path);
 
 	FILE * file;

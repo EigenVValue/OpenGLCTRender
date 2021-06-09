@@ -322,10 +322,15 @@ int main(int argc, char* argv[]) {
 
 		// Set light postion
 		// Side light
-		glm::vec3 lightPos = vec3(-10.0f, 5.0f, 5.0f);
+		float sideZ = -11.0f;
+		float sideX = sideZ * sqrt(3.0f);
+		glm::vec3 lightPos = vec3(sideX, 0.0f, sideZ);
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
-		glm::vec3 lightPos2 = vec3(10.0f, 5.0f, 5.0f);
+		glm::vec3 lightPos2 = vec3(-sideX, 0.0f, sideZ);
 		glUniform3f(LightID2, lightPos2.x, lightPos2.y, lightPos2.z);
+		// Back light
+		glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
+		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
 		
 		// Back light
 		glm::vec3 lightPos3 = vec3(0.0f, -12.36f, -4.0f);

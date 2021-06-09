@@ -154,6 +154,7 @@
     <ClCompile Include="getNormals.cpp" />
     <ClCompile Include="getUVs.cpp" />
     <ClCompile Include="loadOBJ.cpp" />
+    <ClCompile Include="sampleTexture.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -174,9 +175,6 @@
     <ClInclude Include="loadOBJ.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="texture.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="texture.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

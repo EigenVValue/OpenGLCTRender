@@ -42,6 +42,9 @@
     <ClCompile Include="getUVs.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="sampleTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fShader.fragmentshader">
@@ -85,10 +88,5 @@
     <ClInclude Include="getUVs.hpp">
       <Filter>common</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="texture.txt">
-      <Filter>Source Files</Filter>
-    </Text>
   </ItemGroup>
 </Project>

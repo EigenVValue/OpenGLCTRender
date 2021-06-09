@@ -1,7 +1,7 @@
 #version 330 core
 
 // Interpolated values from the vertex shaders
-in vec3 fragmentColor;
+in vec2 UV;
 in vec4 ShadowCoord;
 
 in vec3 Position_worldspace;
@@ -18,17 +18,18 @@ layout(location = 0) out vec3 color;
 uniform vec3 LightPosition_worldspace;
 uniform vec3 LightPosition_worldspace2;
 uniform vec3 LightPosition_worldspace3;
+uniform sampler2D myTextureSampler;
 
 vec3 calLight(vec3 LightDirection_cameraspace,
 	vec3 LightPosition_worldspace,
 	float LightPower) 
 {
 	// Light emission properties
-	vec3 LightColor = vec3(1.0,1.0,1.0);
+	vec3 LightColor = vec3(0.8,0.8,0.8);
 
 	// Material properties
-	vec3 MaterialDiffuseColor = vec3(0.5,0.5,0.5);
-	vec3 MaterialSpecularColor = vec3(0.2,0.2,0.2);
+	vec3 MaterialDiffuseColor = texture( myTextureSampler, UV ).rgb;
+	vec3 MaterialSpecularColor = vec3(0.3,0.3,0.3);
 
 	// Use for simple light source attenuation
 	// Atten = 1 / d^2
@@ -68,7 +69,7 @@ void main()
 {
 	// Ambient
 	// Light emission properties
-	vec3 LightColor = vec3(1.0,1.0,1.0);
+	vec3 LightColor = vec3(0.8,0.8,0.8);
 	// Material properties
 	vec3 MaterialAmbientColor = vec3(0.2,0.2,0.2);
 
@@ -80,7 +81,7 @@ void main()
 	result = result + calLight(LightDirection_cameraspace2, LightPosition_worldspace2, 120f);
 
 	// Back light with light power 60 (in 255).
-	result = result + calLight(LightDirection_cameraspace3, LightPosition_worldspace3, 60f);
+	result = result + calLight(LightDirection_cameraspace3, LightPosition_worldspace3, 70f);
 	
 	// Frag color
 	color = ambient + result;
