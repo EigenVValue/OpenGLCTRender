@@ -1,3 +1,4 @@
+
 // Include standard liabraries
 #include <vector>
 #include <filesystem>
@@ -95,8 +96,9 @@ int main(int argc, char* argv[]) {
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
 		//currPath += "\\img\\cube.obj";
-		currPath += "\\img\\head.obj";
+		//currPath += "\\img\\head.obj";
 		//currPath += "\\img\\head2.obj";
+		currPath += "\\img\\bone2.obj";
 		char* path = currPath.string().data();
 		bool res = loadOBJ(path, objVertices, objFaces);
 		if (!res) {
