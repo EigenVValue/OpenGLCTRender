@@ -13,6 +13,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="DcmToModel">
+      <UniqueIdentifier>{a17fd9fd-75bd-4bd3-87d5-ac7038e9ea9c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="demo.cpp">
@@ -44,6 +47,12 @@
     </ClCompile>
     <ClCompile Include="sampleTexture.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="demoFor3Pts.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="example.cpp">
+      <Filter>DcmToModel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +96,18 @@
     </ClInclude>
     <ClInclude Include="getUVs.hpp">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="example.h">
+      <Filter>DcmToModel</Filter>
+    </ClInclude>
+    <ClInclude Include="dualmc.h">
+      <Filter>DcmToModel</Filter>
+    </ClInclude>
+    <ClInclude Include="dualmc.hpp">
+      <Filter>DcmToModel</Filter>
+    </ClInclude>
+    <ClInclude Include="dualmc_tables.hpp">
+      <Filter>DcmToModel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

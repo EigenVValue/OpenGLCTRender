@@ -10,19 +10,65 @@ std::vector<glm::vec3> getVertexNormals(
 	const std::vector<unsigned int> &objFaces)
 {
 	std::vector<glm::vec3> normals;
+	// Use an array to save vertex normal data
 	glm::vec3 *faceArr = new glm::vec3[objVertices.size()];
 	memset(faceArr, 0, sizeof(glm::vec3) * objVertices.size());
 
 	// Add surface normal vector
 	for (int i = 0; i < objFaces.size(); i += 3) {
+
+		// First triangle
 		glm::vec3 faceNorm = getNormal(
-			objVertices.at(objFaces.at(i) - 1),
-			objVertices.at(objFaces.at(i + 1) - 1),
-			objVertices.at(objFaces.at(i + 2) - 1))
+			objVertices[objFaces.at(i)],
+			objVertices[objFaces.at(i + 1)],
+			objVertices[objFaces.at(i + 2)])
 			* getArea(
-				objVertices.at(objFaces.at(i) - 1),
-				objVertices.at(objFaces.at(i + 1) - 1),
-				objVertices.at(objFaces.at(i + 2) - 1));
+				objVertices[objFaces.at(i)],
+				objVertices[objFaces.at(i + 1)],
+				objVertices[objFaces.at(i + 2)]);
+
+		// Vertex 1
+		faceArr[objFaces.at(i)] += faceNorm;
+		// Vertex 2
+		faceArr[objFaces.at(i+1)] += faceNorm;
+		// Vertex 3
+		faceArr[objFaces.at(i+2)] += faceNorm;
+
+	}
+
+	// Build normals
+	for (int i = 0; i < objVertices.size(); i++)
+	{
+		glm::vec3 normal = faceArr[i];
+		normal = glm::normalize(normal);
+		normals.push_back(normal);
+	}
+
+	return normals;
+}
+
+
+std::vector<glm::vec3> getVertexNormalsFor4Pts(
+	const std::vector<glm::vec3> &objVertices,
+	const std::vector<unsigned int> &objFaces)
+{
+	std::vector<glm::vec3> normals;
+	// Use an array to save vertex normal data
+	glm::vec3 *faceArr = new glm::vec3[objVertices.size()];
+	memset(faceArr, 0, sizeof(glm::vec3) * objVertices.size());
+
+	// Add surface normal vector
+	for (int i = 0; i < objFaces.size(); i += 4) {
+
+		// First triangle
+		glm::vec3 faceNorm = getNormal(
+			objVertices[objFaces.at(i)],
+			objVertices[objFaces.at(i + 1)],
+			objVertices[objFaces.at(i + 2)])
+			* getArea(
+				objVertices[objFaces.at(i)],
+				objVertices[objFaces.at(i + 1)],
+				objVertices[objFaces.at(i + 2)]);
 
 		// Vertex 1
 		faceArr[objFaces.at(i)] += faceNorm;
@@ -30,12 +76,31 @@ std::vector<glm::vec3> getVertexNormals(
 		faceArr[objFaces.at(i + 1)] += faceNorm;
 		// Vertex 3
 		faceArr[objFaces.at(i + 2)] += faceNorm;
+
+
+		// Second triangle
+		faceNorm = getNormal(
+			objVertices[objFaces.at(i + 1)],
+			objVertices[objFaces.at(i + 2)],
+			objVertices[objFaces.at(i + 3)])
+			* getArea(
+				objVertices[objFaces.at(i + 1)],
+				objVertices[objFaces.at(i + 2)],
+				objVertices[objFaces.at(i + 3)]);
+
+		// Vertex 2
+		faceArr[objFaces.at(i + 1)] += faceNorm;
+		// Vertex 3
+		faceArr[objFaces.at(i + 2)] += faceNorm;
+		// Vertex 4
+		faceArr[objFaces.at(i + 3)] += faceNorm;
+
 	}
 
 	// Build normals
-	for (int i = 0; i < objFaces.size(); i++)
+	for (int i = 0; i < objVertices.size(); i++)
 	{
-		glm::vec3 normal = faceArr[objFaces.at(i)];
+		glm::vec3 normal = faceArr[i];
 		normal = glm::normalize(normal);
 		normals.push_back(normal);
 	}
@@ -64,9 +129,11 @@ std::vector<glm::vec3> getNormals(
 	return normals;
 }
 
-glm::vec3 getNormal(const glm::vec3 &vertex1,
-	const glm::vec3 &vertex2, const glm::vec3 &vertex3)
-{
+glm::vec3 getNormal(
+	const glm::vec3 &vertex1,
+	const glm::vec3 &vertex2, 
+	const glm::vec3 &vertex3
+) {
 	glm::vec3 normal;
 	// U = p2 - p1
 	// V = p3 - p1
@@ -74,7 +141,6 @@ glm::vec3 getNormal(const glm::vec3 &vertex1,
 	glm::vec3 vecU = vertex1 - vertex2;
 	glm::vec3 vecV = vertex1 - vertex3;
 	normal = glm::cross(vecU, vecV);
-
 
 	return normal;
 }

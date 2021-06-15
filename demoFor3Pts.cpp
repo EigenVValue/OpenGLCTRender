@@ -1,3 +1,4 @@
+/*
 // Include standard liabraries
 #include <vector>
 #include <filesystem>
@@ -28,25 +29,13 @@ using namespace glm;
 #include <texture.hpp>
 #include <getUVs.hpp>
 
-// Include dcmToModel
-#include "example.h"
-
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 
-void dcmToModel(std::string path,
-	unsigned int *size,
-	float iso,
-	std::vector<glm::vec3> & objVertices,
-	std::vector<unsigned int> & objFaces
-) {
-	DualMCExample example;
-	example.run(path, size, iso, objVertices, objFaces);
-}
-
 // MAIN function
 int main(int argc, char* argv[]) {
+	float start = clock();
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -93,7 +82,7 @@ int main(int argc, char* argv[]) {
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
-	// Set vertex, color and normal
+	// Set vertices, uvs and normals
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
@@ -102,30 +91,17 @@ int main(int argc, char* argv[]) {
 	std::vector<glm::vec3> objVertices;
 	std::vector<unsigned int> objFaces;
 
-	/*
 	// Load obj
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
-		//currPath += "\\img\\cube.obj";
-		//currPath += "\\img\\head.obj";
-		//currPath += "\\img\\head2.obj";
-		currPath += "\\img\\bone2.obj";
+		currPath += "\\img\\cube.obj";
 		char* path = currPath.string().data();
 		bool res = loadOBJ(path, objVertices, objFaces);
 		if (!res) {
 			printf("loadOBJ fail!");
 			return 0;
 		}
-	}*/
-
-	// Load obj
-	{
-		// Load raw file
-		std::string path = "D:\VS\Project\dualmc-master\data\CT4.raw";
-		unsigned int size[3] = { 256,256,201 };
-		float iso = 0.8f;
-		dcmToModel(path, size, iso, objVertices, objFaces);
 	}
 
 	// Get vertex
@@ -155,8 +131,8 @@ int main(int argc, char* argv[]) {
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
-	//normals = getVertexNormalsFor4Pts(objVertices, objFaces);
 	normals = getVertexNormals(objVertices, objFaces);
+
 
 	getUVs(vertices, vec3(1, 0, 0), uvs);
 
@@ -203,7 +179,7 @@ int main(int argc, char* argv[]) {
 		char* path = currPath.string().data();
 		Texture = loadDDS(path);
 	}
-	
+
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 
@@ -232,7 +208,7 @@ int main(int argc, char* argv[]) {
 
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		// Send transformation to the currently bound shader, 
+		// Send transformation to the currently bound shader,
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
@@ -260,47 +236,51 @@ int main(int argc, char* argv[]) {
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 		glVertexAttribPointer(
-			0,									// attribute. No particular reason for 0, but must match the layout in the shader.
-			3,									// size
-			GL_FLOAT,					// type
-			GL_FALSE,					// normalized?
-			0,									// stride
-			(void*)0						// array buffer offset
+			0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
 		);
-		
+
 		// 2nd attribute buffer : UVs
 		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 		glVertexAttribPointer(
-			1,									// attribute. No particular reason for 1, but must match the layout in the shader.
-			2,									// size : U+V => 2
-			GL_FLOAT,					// type
-			GL_FALSE,					// normalized?
-			0,									// stride
-			(void*)0						// array buffer offset
+			1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+			2,                                // size : U+V => 2
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
 		);
-		
+
 		// 3rd attribute buffer : normals
 		glEnableVertexAttribArray(2);
 		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 		glVertexAttribPointer(
-			2,									// attribute
-			3,									// size
-			GL_FLOAT,					// type
-			GL_FALSE,					// normalized?
-			0,									// stride
-			(void*)0						// array buffer offset
+			2,                                // attribute
+			3,                                // size
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
 		);
+
 
 		// Index buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-		
+
 		glDrawElements(
-			GL_TRIANGLES,		// mode
-			objFaces.size(),			// count
-			GL_UNSIGNED_INT,	// type
-			(void*)0						// element array buffer offset
+			GL_TRIANGLES,      // mode
+			objFaces.size(),    // count
+			GL_UNSIGNED_INT,   // type
+			(void*)0           // element array buffer offset
 		);
+
+		// Draw the triangle
+		//glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
@@ -320,6 +300,7 @@ int main(int argc, char* argv[]) {
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteBuffers(1, &elementbuffer);
 	glDeleteProgram(programID);
+	glDeleteTextures(1, &Texture);
 	glDeleteVertexArrays(1, &VertexArrayID);
 
 	// Close OpenGL window and terminate GLFW
@@ -327,3 +308,5 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+
+*/

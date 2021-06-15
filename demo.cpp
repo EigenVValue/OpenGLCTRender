@@ -105,13 +105,34 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Get vertex
-	objVerticesToGLVertices(vertices, objVertices, objFaces);
+	//objVerticesToGLVertices(vertices, objVertices, objFaces);
+	{
+		// Get pivot Need change
+		float pivot[3] = { 0.0f };
+		for (auto & vertex : objVertices) {
+			// Add up
+			pivot[0] += vertex.x;
+			pivot[1] += vertex.y;
+			pivot[2] += vertex.z;
+		}
+		pivot[0] /= objVertices.size();
+		pivot[1] /= objVertices.size();
+		pivot[2] /= objVertices.size();
+
+		for (auto & vertex : objVertices) {
+			vertex.x -= pivot[0];
+			vertex.y -= pivot[1];
+			vertex.z -= pivot[2];
+		}
+	}
+	vertices = objVertices;
 
 	// Get normal
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
 	normals = getVertexNormals(objVertices, objFaces);
+	
 
 	getUVs(vertices, vec3(1, 0, 0), uvs);
 
@@ -129,6 +150,12 @@ int main(int argc, char* argv[]) {
 	glGenBuffers(1, &normalbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+
+	// Generate a buffer for the indices
+	GLuint elementbuffer;
+	glGenBuffers(1, &elementbuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, objFaces.size() * sizeof(unsigned int), &objFaces[0], GL_STATIC_DRAW);
 
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
@@ -216,7 +243,7 @@ int main(int argc, char* argv[]) {
 			0,                  // stride
 			(void*)0            // array buffer offset
 		);
-
+		
 		// 2nd attribute buffer : UVs
 		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
@@ -240,10 +267,20 @@ int main(int argc, char* argv[]) {
 			0,                                // stride
 			(void*)0                          // array buffer offset
 		);
+		
+		
+		// Index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
-
+		glDrawElements(
+			GL_TRIANGLES,      // mode
+			objFaces.size(),    // count
+			GL_UNSIGNED_INT,   // type
+			(void*)0           // element array buffer offset
+		);
+		
 		// Draw the triangle
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+		//glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
@@ -261,7 +298,9 @@ int main(int argc, char* argv[]) {
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
+	glDeleteBuffers(1, &elementbuffer);
 	glDeleteProgram(programID);
+	glDeleteTextures(1, &Texture);
 	glDeleteVertexArrays(1, &VertexArrayID);
 
 	// Close OpenGL window and terminate GLFW
