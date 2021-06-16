@@ -6,7 +6,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-// GLFW
+// GLFWd
 #include <GLFW/glfw3.h>
 GLFWwindow* window;
 
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
 	// Load obj
 	{
 		// Load raw file
-		std::string path = "D:\VS\Project\dualmc-master\data\CT4.raw";
+		std::string path = "D://VS//Project//dualmc-master//data//CT4.raw";
 		unsigned int size[3] = { 256,256,201 };
 		float iso = 0.8f;
 		dcmToModel(path, size, iso, objVertices, objFaces);
@@ -165,10 +165,12 @@ int main(int argc, char* argv[]) {
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
+	
 	GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	
 
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);

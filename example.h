@@ -48,7 +48,10 @@ private:
 	};
 
 	/// Parse program arguments.
-	bool parseArgs(std::string command, AppOptions & options);
+	bool parseArgs(const std::string path,
+		const unsigned int *size,
+		const float iso,
+		AppOptions & options);
 
 	/// Generate an example volume for the dual mc builder.
 	void generateCaffeine();

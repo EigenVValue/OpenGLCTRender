@@ -43,23 +43,19 @@ void DualMCExample::run(const std::string path,
 ) {
 	// parse program options
 	AppOptions options;
-	if (!parseArgs(command, options)) {
+	if (!parseArgs(path, size, iso, options)) {
 		return;
 	}
 
-	// load raw file or generate example volume dataset
+	// load raw file
 	if (options.generateCaffeine) {
+		// Always false in this program 
 		generateCaffeine();
 	}
 	else if (!options.inputFile.empty()) {
 		if (!loadRawFile(options.inputFile, options.dimX, options.dimY, options.dimZ)) {
 			return;
 		}
-	}
-	else {
-		std::cerr << "No input specified" << std::endl;
-		printHelpHint();
-		return;
 	}
 
 	// compute ISO surface
@@ -162,9 +158,10 @@ bool DualMCExample::parseArgs(int const argc, char** argv, AppOptions & options)
 	return true;
 }*/
 
-bool DualMCExample::parseArgs(std::string path, 
-	unsigned int *size, 
-	float iso, 
+bool DualMCExample::parseArgs(
+	const std::string path, 
+	const unsigned int *size, 
+	const float iso, 
 	AppOptions & options) {
 	// set default values
 	options.inputFile.assign("");
@@ -178,37 +175,16 @@ bool DualMCExample::parseArgs(std::string path,
 	//options.outputFile.assign("surface.obj");
 
 	// parse arguments
-	if(strcmp(argv[currentArg], "-iso") == 0) {
-		// Read the iso value and clamp it to [0,1].
-		// Invalid values are set to 0.
-		options.isoValue = atof(argv[currentArg + 1]);
-		if (options.isoValue > 1.0f)
-			options.isoValue = 1.0f;
-		else if (options.isoValue < 0.0f || options.isoValue != options.isoValue)
-			options.isoValue = 0.0f;
-		++currentArg;
-	}
-	if (strcmp(argv[currentArg], "-raw") == 0) {
-			if (currentArg + 4 >= argc) {
-				std::cerr << "Not enough arguments for raw file" << std::endl;
-				return false;
-			}
-			options.inputFile.assign(argv[currentArg + 1]);
-			options.dimX = atoi(argv[currentArg + 2]);
-			options.dimY = atoi(argv[currentArg + 3]);
-			options.dimZ = atoi(argv[currentArg + 4]);
-			currentArg += 4;
-		}
-		else if (strcmp(argv[currentArg], "-help") == 0) {
-			printArgs();
-			return false;
-		}
-		else {
-			std::cerr << "Unknown argument: " << argv[currentArg] << std::endl;
-			printHelpHint();
-			return false;
-		}
-	}
+
+	// -iso
+	options.isoValue = iso;
+
+	// -raw
+	options.inputFile.assign(path);
+	options.dimX = size[0];
+	options.dimY = size[1];
+	options.dimZ = size[2];
+
 	return true;
 }
 

@@ -78,8 +78,8 @@
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)demo;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)demo\dependencies\include;$(SolutionDir)demo;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)demo\dependencies\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)demo\dependencies\include;$(SolutionDir)demo;$(IncludePath)</IncludePath>
