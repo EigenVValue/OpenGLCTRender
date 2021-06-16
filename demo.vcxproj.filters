@@ -48,9 +48,6 @@
     <ClCompile Include="sampleTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="demoFor3Pts.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="example.cpp">
       <Filter>DcmToModel</Filter>
     </ClCompile>

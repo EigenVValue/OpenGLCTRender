@@ -6,6 +6,10 @@
 /// \author Dominik Wodniok
 /// \date   2009
 
+#include <process.h>
+#include <Windows.h>
+typedef unsigned(__stdcall * threadFunc) (void *);
+
 //------------------------------------------------------------------------------
 
 template<class T> inline
@@ -273,6 +277,7 @@ void DualMC<T>::buildQuadSoup(
 	for (int32_t z = 0; z < reducedZ; ++z)
 		for (int32_t y = 0; y < reducedY; ++y)
 			for (int32_t x = 0; x < reducedX; ++x) {
+
 				// construct quad for x edge
 				if (z > 0 && y > 0) {
 					// is edge intersected?
@@ -402,6 +407,13 @@ void DualMC<T>::buildSharedVerticesQuads(
 
 	pointToIndex.clear();
 
+	std::vector<Vertex> & verticesX;
+	std::vector<Vertex> & verticesY;
+	std::vector<Vertex> & verticesZ;
+	std::vector<Quad> & quadsX;
+	std::vector<Quad> & quadsY;
+	std::vector<Quad> & quadsZ;
+	/*
 	// iterate voxels
 	for (int32_t z = 0; z < reducedZ; ++z)
 		for (int32_t y = 0; y < reducedY; ++y)
@@ -466,4 +478,178 @@ void DualMC<T>::buildSharedVerticesQuads(
 					}
 				}
 			}
+			*/
+
+	HANDLE handle[3];
+	unsigned threadID;
+	// iterate voxels
+	threadData threadData1 = {
+		&reducedX, &reducedY, &reducedZ, &iso, &verticesX, &quadsX, &data
+	};
+	threadData threadData2 = {
+		&reducedX, &reducedY, &reducedZ, &iso, &verticesY, &quadsY, &data
+	};
+	threadData threadData3 = {
+		&reducedX, &reducedY, &reducedZ, &iso, &verticesZ, &quadsZ, &data
+	};
+	handle[0] = (HANDLE)_beginthreadex(
+		NULL,	//void *security
+		0,	//unsigned stacksize
+		procX,	//unsigned(__stdcall * initialcode) (void *),
+		(void*)&threadData1,//void * argument,
+		0,	//unsigned createflag,
+		&threadID	//unsigned *thrdaddr
+	);
+	handle[1] = (HANDLE)_beginthreadex(
+		NULL,	//void *security
+		0,	//unsigned stacksize
+		procY,	//unsigned(__stdcall * initialcode) (void *),
+		(void*)&threadData1,//void * argument,
+		0,	//unsigned createflag,
+		&threadID	//unsigned *thrdaddr
+	);
+	handle[2] = (HANDLE)_beginthreadex(
+		NULL,	//void *security
+		0,	//unsigned stacksize
+		procZ,	//unsigned(__stdcall * initialcode) (void *),
+		(void*)&threadData1,//void * argument,
+		0,	//unsigned createflag,
+		&threadID	//unsigned *thrdaddr
+	);
+
+	WaitForMultipleObjects(3, handle, TRUE, INFINITE);
+	// Merge
+	vertices.insert(vertices.end(), verticesX.begin(), verticesX.end());
+	vertices.insert(vertices.end(), verticesY.begin(), verticesY.end());
+	vertices.insert(vertices.end(), verticesZ.begin(), verticesZ.end());
+	quads.insert(quads.end(), quadsX.begin(), quadsX.end());
+	quads.insert(quads.end(), quadsY.begin(), quadsY.end());
+	quads.insert(quads.end(), quadsZ.begin(), quadsZ.end());
+	
+}
+
+struct threadData
+{
+	const int32_t reducedX;
+	const int32_t reducedY;
+	const int32_t reducedZ;
+	const uint8_t iso;
+	std::vector<Vertex> vertices;
+	std::vector<Quad> quads;
+	const uint8_t *data;
+};
+
+unsigned procX(void * param)
+{
+	auto &threadData1 = *(threadData *)param;
+	auto &reducedX = threadData1.reducedX;
+	auto &reducedY = threadData1.reducedY;
+	auto &reducedZ = threadData1.reducedZ;
+	auto &iso = threadData1.iso;
+	auto &vertices = threadData1.vertices;
+	auto &quads = threadData1.quads;
+	auto &data = threadData1.data;
+	for (int32_t z = 0; z < reducedZ; ++z)
+		for (int32_t y = 0; y < reducedY; ++y)
+			for (int32_t x = 0; x < reducedX; ++x) {
+				// construct quads for x edge
+				if (z > 0 && y > 0) {
+					bool const entering = data[gA(x, y, z)] < iso && data[gA(x + 1, y, z)] >= iso;
+					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x + 1, y, z)] < iso;
+					if (entering || exiting) {
+						// generate quad
+						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE0, vertices);
+						i1 = getSharedDualPointIndex(x, y, z - 1, iso, EDGE2, vertices);
+						i2 = getSharedDualPointIndex(x, y - 1, z - 1, iso, EDGE6, vertices);
+						i3 = getSharedDualPointIndex(x, y - 1, z, iso, EDGE4, vertices);
+
+						if (entering) {
+							quads.emplace_back(i0, i1, i2, i3);
+						}
+						else {
+							quads.emplace_back(i0, i3, i2, i1);
+						}
+					}
+				}
+			}
+	return 0;
+}
+
+unsigned procY(void * param)
+{
+	auto &reducedX = *(const int32_t *)param1;
+	auto &reducedY = *(const int32_t *)param2;
+	auto &reducedZ = *(const int32_t *)param3;
+	auto &iso = *(VolumeDataType const *)param4;
+	auto &vertices = *(std::vector<Vertex> *)param5;
+	auto &quads = *(std::vector<Quad> *)param6;
+	auto &data = *(VolumeDataType const *)param7;
+
+	for (int32_t z = 0; z < reducedZ; ++z)
+		for (int32_t y = 0; y < reducedY; ++y)
+			for (int32_t x = 0; x < reducedX; ++x) {
+				// construct quads for y edge
+				if (z > 0 && x > 0) {
+					bool const entering = data[gA(x, y, z)] < iso && data[gA(x, y + 1, z)] >= iso;
+					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x, y + 1, z)] < iso;
+					if (entering || exiting) {
+						// generate quad
+						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE8, vertices);
+						i1 = getSharedDualPointIndex(x, y, z - 1, iso, EDGE11, vertices);
+						i2 = getSharedDualPointIndex(x - 1, y, z - 1, iso, EDGE10, vertices);
+						i3 = getSharedDualPointIndex(x - 1, y, z, iso, EDGE9, vertices);
+
+						if (exiting) {
+							quads.emplace_back(i0, i1, i2, i3);
+						}
+						else {
+							quads.emplace_back(i0, i3, i2, i1);
+						}
+					}
+				}
+			}
+	return 0;
+}
+
+unsigned procZ(
+	void * param1,
+	void * param2,
+	void * param3,
+	void * param4,
+	void * param5,
+	void * param6,
+	void * param7)
+{
+	auto &reducedX = *(const int32_t *)param1;
+	auto &reducedY = *(const int32_t *)param2;
+	auto &reducedZ = *(const int32_t *)param3;
+	auto &iso = *(VolumeDataType const *)param4;
+	auto &vertices = *(std::vector<Vertex> *)param5;
+	auto &quads = *(std::vector<Quad> *)param6;
+	auto &data = *(VolumeDataType const *)param7;
+
+	for (int32_t z = 0; z < reducedZ; ++z)
+		for (int32_t y = 0; y < reducedY; ++y)
+			for (int32_t x = 0; x < reducedX; ++x) {
+				// construct quads for z edge
+				if (x > 0 && y > 0) {
+					bool const entering = data[gA(x, y, z)] < iso && data[gA(x, y, z + 1)] >= iso;
+					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x, y, z + 1)] < iso;
+					if (entering || exiting) {
+						// generate quad
+						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE3, vertices);
+						i1 = getSharedDualPointIndex(x - 1, y, z, iso, EDGE1, vertices);
+						i2 = getSharedDualPointIndex(x - 1, y - 1, z, iso, EDGE5, vertices);
+						i3 = getSharedDualPointIndex(x, y - 1, z, iso, EDGE7, vertices);
+
+						if (exiting) {
+							quads.emplace_back(i0, i1, i2, i3);
+						}
+						else {
+							quads.emplace_back(i0, i3, i2, i1);
+						}
+					}
+				}
+			}
+	return 0;
 }

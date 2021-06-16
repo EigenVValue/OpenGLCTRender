@@ -5,11 +5,6 @@ std::vector<glm::vec3> getNormals(
 	const std::vector<glm::vec3> &vertices
 );
 
-std::vector<glm::vec3> getVertexNormalsFor4Pts(
-	const std::vector<glm::vec3> &objVertices,
-	const std::vector<unsigned int> &objFaces
-);
-
 glm::vec3 getNormal(const glm::vec3 &vertex1,
 	const glm::vec3 &vertex2, const glm::vec3 &vertex3
 );

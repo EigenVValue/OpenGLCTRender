@@ -151,7 +151,6 @@
     <ClCompile Include="controls.cpp" />
     <ClCompile Include="controlsForFOV.cpp" />
     <ClCompile Include="demo.cpp" />
-    <ClCompile Include="demoFor3Pts.cpp" />
     <ClCompile Include="example.cpp" />
     <ClCompile Include="getNormals.cpp" />
     <ClCompile Include="getUVs.cpp" />

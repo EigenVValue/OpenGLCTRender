@@ -99,6 +99,14 @@ namespace dualmc {
 			std::vector<Quad> & quads
 		);
 
+		void procX(
+			const int32_t reducedX,
+			const int32_t reducedY,
+			const int32_t reducedZ,
+			const VolumeDataType iso,
+			std::vector<Vertex> & vertices,
+			std::vector<Quad> & quads
+		);
 
 	private:
 

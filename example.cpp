@@ -61,7 +61,7 @@ void DualMCExample::run(const std::string path,
 	// compute ISO surface
 	computeSurface(options.isoValue, options.generateQuadSoup, options.generateManifold);
 
-	// write vertices
+	// Get vertices
 	for (auto const & v : vertices) {
 		glm::vec3 vertex;
 		vertex.x = v.x;
@@ -70,7 +70,7 @@ void DualMCExample::run(const std::string path,
 		objVertices.push_back(vertex);
 	}
 
-	// write quad indices
+	// Get quad indices
 	for (auto const & q : quads) {
 		unsigned int face[4];
 		face[0] = q.i0;
@@ -386,39 +386,6 @@ bool DualMCExample::loadRawFile(std::string const & fileName, int32_t dimX, int3
 	}
 
 	return true;
-}
-
-//------------------------------------------------------------------------------
-
-void DualMCExample::writeOBJ(std::string const & fileName) const {
-	std::cout << "Writing OBJ file" << std::endl;
-	// check if we actually have an ISO surface
-	if (vertices.size() == 0 || quads.size() == 0) {
-		std::cout << "No ISO surface generated. Skipping OBJ generation." << std::endl;
-		return;
-	}
-
-	// open output file
-	std::ofstream file(fileName);
-	if (!file) {
-		std::cout << "Error opening output file" << std::endl;
-		return;
-	}
-
-	std::cout << "Generating OBJ mesh with " << vertices.size() << " vertices and "
-		<< quads.size() << " quads" << std::endl;
-
-	// write vertices
-	for (auto const & v : vertices) {
-		file << "v " << v.x << ' ' << v.y << ' ' << v.z << '\n';
-	}
-
-	// write quad indices
-	for (auto const & q : quads) {
-		file << "f " << (q.i0 + 1) << ' ' << (q.i1 + 1) << ' ' << (q.i2 + 1) << ' ' << (q.i3 + 1) << '\n';
-	}
-
-	file.close();
 }
 
 //------------------------------------------------------------------------------

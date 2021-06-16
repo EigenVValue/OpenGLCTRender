@@ -34,10 +34,13 @@ using namespace glm;
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
+const std::string PATH = "D://VS//Project//dualmc-master//data//CT4.raw";
+const unsigned int SIZE[3] = { 256,256,201 };
+const float ISO = 0.8f;
 
-void dcmToModel(std::string path,
-	unsigned int *size,
-	float iso,
+void dcmToModel(const std::string path,
+	const unsigned int *size,
+	const float iso,
 	std::vector<glm::vec3> & objVertices,
 	std::vector<unsigned int> & objFaces
 ) {
@@ -47,6 +50,8 @@ void dcmToModel(std::string path,
 
 // MAIN function
 int main(int argc, char* argv[]) {
+	clock_t start, end;
+	start = clock();
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -61,7 +66,7 @@ int main(int argc, char* argv[]) {
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	window = glfwCreateWindow(WIDTH, HEIGHT, "demo", nullptr, nullptr);
 	if (window == NULL) {
-		fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not compatible.\n");
+		fprintf(stderr, "Failed to open GLFW window\n");
 		getchar();
 		glfwTerminate();
 		return -1;
@@ -71,7 +76,6 @@ int main(int argc, char* argv[]) {
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
-
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	// Hide the mouse and enable unlimited mouvement
@@ -92,7 +96,7 @@ int main(int argc, char* argv[]) {
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
-
+	
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
@@ -103,7 +107,7 @@ int main(int argc, char* argv[]) {
 	std::vector<unsigned int> objFaces;
 
 	/*
-	// Load obj
+	// Load obj no need for now
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
@@ -122,10 +126,7 @@ int main(int argc, char* argv[]) {
 	// Load obj
 	{
 		// Load raw file
-		std::string path = "D://VS//Project//dualmc-master//data//CT4.raw";
-		unsigned int size[3] = { 256,256,201 };
-		float iso = 0.8f;
-		dcmToModel(path, size, iso, objVertices, objFaces);
+		dcmToModel(PATH, SIZE, ISO, objVertices, objFaces);
 	}
 
 	// Get vertex
@@ -155,7 +156,6 @@ int main(int argc, char* argv[]) {
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
-	//normals = getVertexNormalsFor4Pts(objVertices, objFaces);
 	normals = getVertexNormals(objVertices, objFaces);
 
 	getUVs(vertices, vec3(1, 0, 0), uvs);
@@ -209,7 +209,9 @@ int main(int argc, char* argv[]) {
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 
-	//printf("Start rendering\n");
+	printf("Start rendering\n");
+	end = clock();
+	printf("%f", (float)(end-start) / CLOCKS_PER_SEC);
 	do {
 
 		// Clear the screen
