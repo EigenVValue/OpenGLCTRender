@@ -1,4 +1,3 @@
-/*
 // Include standard liabraries
 #include <vector>
 #include <filesystem>
@@ -11,7 +10,7 @@
 #include <GLFW/glfw3.h>
 GLFWwindow* window;
 
-// Include GLM
+// GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -26,14 +25,61 @@ using namespace glm;
 //#include <controls.hpp>
 #include <controlsForFOV.hpp>
 #include <getNormals.hpp>
+#include <texture.hpp>
+#include <getUVs.hpp>
+
+// Include dcmToModel
+#include "dependencies/include/converttobmp.h"
+#include "getImageData.h"
+#include "dcmToModel.hpp"
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
+const char* PATH // DCM path
+= "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
+const float ISO = 0.8f;	// Threshold
+
+// Convert dcm files to obj model
+void dcmFileToModel(
+	const char* path,
+	const float iso,
+	std::vector<glm::vec3> & objVertices,
+	std::vector<unsigned int> & objFaces
+) {
+	// Set x, y, z and data
+	unsigned int dimX = 0;
+	unsigned int dimY = 0;
+	unsigned int dimZ = 0;
+	std::vector<uint8_t> raw;
+
+	// Convert dcm files to raw file
+	getImageData(
+		path,
+		raw,
+		dimX,
+		dimY,
+		dimZ
+	);
+	printf("%s", "Get image done.\n");
+
+	// Convert raw file to obj model
+	dcmToModel dcm2Model;
+	dcm2Model.run(
+		raw,
+		dimX,
+		dimY,
+		dimZ,
+		iso,
+		objVertices,
+		objFaces
+	);
+}
 
 // MAIN function
 int main(int argc, char* argv[]) {
-	float start = clock();
+	clock_t start, end;
+	start = clock();
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -44,27 +90,26 @@ int main(int argc, char* argv[]) {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	
+
 	// Create a GLFWwindow object that we can use for GLFW's functions
 	window = glfwCreateWindow(WIDTH, HEIGHT, "demo", nullptr, nullptr);
 	if (window == NULL) {
-		fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not compatible.\n");
+		fprintf(stderr, "Failed to open GLFW window\n");
 		getchar();
 		glfwTerminate();
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	
+
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
-
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	// Hide the mouse and enable unlimited mouvement
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	// set background
+	// Set background color
 	glClearColor(0.467f, 0.467f, 0.467f, 0.0f);
 
 	// Enable depth test
@@ -79,124 +124,85 @@ int main(int argc, char* argv[]) {
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
-	
-
-	// Create and compile depth GLSL program from the shaders
-	GLuint depthProgramID = LoadShaders("DepthRTT.vertexshader", "DepthRTT.fragmentshader");
-
-	// Get a handle for depth "MVP" uniform
-	GLuint depthMatrixID = glGetUniformLocation(depthProgramID, "depthMVP");
-	
-
 
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> colors;
+	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
-	// Get vertex via loading obj file
+	// Get vertex via loading raw file
 	std::vector<glm::vec3> objVertices;
 	std::vector<unsigned int> objFaces;
+	dcmFileToModel(PATH, ISO, objVertices, objFaces);
 
-	
-	// Load obj
+	// Load obj no need for now
+	/*
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
-		currPath += "\\img\\cube.obj";
+		//currPath += "\\img\\cube.obj";
+		//currPath += "\\img\\head.obj";
+		//currPath += "\\img\\head2.obj";
+		currPath += "\\img\\bone2.obj";
 		char* path = currPath.string().data();
 		bool res = loadOBJ(path, objVertices, objFaces);
 		if (!res) {
 			printf("loadOBJ fail!");
 			return 0;
 		}
-	}
-	
+	}*/
+
 	// Get vertex
-	objVerticesToGLVertices(vertices, objVertices, objFaces);
-	
+	//objVerticesToGLVertices(vertices, objVertices, objFaces);
+	{
+		// Get pivot Need change
+		float pivot[3] = { 0.0f };
+		for (auto & vertex : objVertices) {
+			// Add up
+			pivot[0] += vertex.x;
+			pivot[1] += vertex.y;
+			pivot[2] += vertex.z;
+		}
+		pivot[0] /= objVertices.size();
+		pivot[1] /= objVertices.size();
+		pivot[2] /= objVertices.size();
+
+		for (auto & vertex : objVertices) {
+			vertex.x -= pivot[0];
+			vertex.y -= pivot[1];
+			vertex.z -= pivot[2];
+		}
+	}
+	vertices = objVertices;
+
 	// Get normal
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
-	normals = getVertexNormals(objVertices,objFaces);
+	normals = getVertexNormals(objVertices, objFaces);
 
-	// Get color
-	// TEMP TEXTURE
-	for (int i = 0; i < vertices.size(); i++) {
-		vec3 temp_color;
-		temp_color.x = 0.502f;
-		temp_color.y = 0.502f;
-		temp_color.z = 0.502f;
-		colors.push_back(temp_color);
-	}
+	/*getUVs(vertices, vec3(1, 0, 0), uvs);*/
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint colorbuffer;
-	glGenBuffers(1, &colorbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
+	/*GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);*/
 
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 
-
-	// ---------------------------------------------
-	// Render to Texture 
-	// ---------------------------------------------
-
-	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-	GLuint FramebufferName = 0;
-	glGenFramebuffers(1, &FramebufferName);
-	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-
-	// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
-	GLuint depthTexture;
-	glGenTextures(1, &depthTexture);
-	glBindTexture(GL_TEXTURE_2D, depthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
-
-	// No color output in the bound framebuffer, only depth.
-	glDrawBuffer(GL_NONE);
-
-	// Always check that our framebuffer is ok
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		return false;
-
-
-	// The quad's FBO. Used only for visualizing the shadowmap.
-	static const GLfloat g_quad_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		 1.0f,  1.0f, 0.0f,
-	};
-
-	GLuint quad_vertexbuffer;
-	glGenBuffers(1, &quad_vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-
-	// Create and compile our GLSL program from the shaders
-	GLuint quad_programID = LoadShaders("Passthrough.vertexshader", "SimpleTexture.fragmentshader");
-	GLuint texID = glGetUniformLocation(quad_programID, "texture");
-
+	// Generate a buffer for the indices
+	GLuint elementbuffer;
+	glGenBuffers(1, &elementbuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, objFaces.size() * sizeof(unsigned int), &objFaces[0], GL_STATIC_DRAW);
 
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
@@ -211,66 +217,23 @@ int main(int argc, char* argv[]) {
 	GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
 	GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
 
+	// Load DDS
+	GLuint Texture;
+	{
+		std::filesystem::path currPath = argv[0];
+		currPath = currPath.parent_path();
+		currPath += "\\img\\uvmap.DDS";
+		char* path = currPath.string().data();
+		Texture = loadDDS(path);
+	}
 
-	//printf("Start rendering\n");
+	// Get a handle for our "myTextureSampler" uniform
+	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
+
+	printf("Start rendering\n");
+	end = clock();
+	printf("%f", (float)(end - start) / CLOCKS_PER_SEC);
 	do {
-
-		// Render to our framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-		glViewport(0, 0, 1024, 1024); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
-		// We don't use bias in the shader, but instead we draw back faces, 
-		// which are already separated from the front faces by a small distance 
-		// (if your geometry is made this way)
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
-
-		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		/ Use our shader
-			glUseProgram(depthProgramID);
-
-		glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
-
-		// Compute the MVP matrix from the light's point of view
-		glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-		glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-		// or, for spot light :
-		//glm::vec3 lightPos(5, 20, 20);
-		//glm::mat4 depthProjectionMatrix = glm::perspective<float>(45.0f, 1.0f, 2.0f, 50.0f);
-		//glm::mat4 depthViewMatrix = glm::lookAt(lightPos, lightPos-lightInvDir, glm::vec3(0,1,0));
-
-		glm::mat4 depthModelMatrix = glm::mat4(1.0);
-		glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-
-		// Send our transformation to the currently bound shader, 
-		// in the "MVP" uniform
-		glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
-
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,  // The attribute we want to configure
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-
-		// Draw the triangle
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-
-		glDisableVertexAttribArray(0);
-
-		// Render to the screen
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, windowWidth, windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
 
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -294,31 +257,11 @@ int main(int argc, char* argv[]) {
 
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		glm::mat4 biasMatrix(
-			0.5, 0.0, 0.0, 0.0,
-			0.0, 0.5, 0.0, 0.0,
-			0.0, 0.0, 0.5, 0.0,
-			0.5, 0.5, 0.5, 1.0
-		);
-
-		glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
-
 		// Send transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
-		glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &depthBiasMVP[0][0]);
-
-		// Bind our texture in Texture Unit 0
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Texture);
-		// Set our "myTextureSampler" sampler to use Texture Unit 0
-		glUniform1i(TextureID, 0);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, depthTexture);
-		glUniform1i(ShadowMapID, 1);
 
 		// Set light postion
 		// Side light
@@ -331,50 +274,58 @@ int main(int argc, char* argv[]) {
 		// Back light
 		glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
 		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
-		
-		// Back light
-		glm::vec3 lightPos3 = vec3(0.0f, -12.36f, -4.0f);
-		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
+
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Texture);
+		// Set our "myTextureSampler" sampler to use Texture Unit 0
+		glUniform1i(TextureID, 0);
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 		glVertexAttribPointer(
-			0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
+			0,									// attribute. No particular reason for 0, but must match the layout in the shader.
+			3,									// size
+			GL_FLOAT,					// type
+			GL_FALSE,					// normalized?
+			0,									// stride
+			(void*)0						// array buffer offset
 		);
 
-		// 2nd attribute buffer : colors
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-		glVertexAttribPointer(
-			1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-			3,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
+		// 2nd attribute buffer : UVs
+		//glEnableVertexAttribArray(1);
+		//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		//glVertexAttribPointer(
+		//	1,									// attribute. No particular reason for 1, but must match the layout in the shader.
+		//	2,									// size : U+V => 2
+		//	GL_FLOAT,					// type
+		//	GL_FALSE,					// normalized?
+		//	0,									// stride
+		//	(void*)0						// array buffer offset
+		//);
 
 		// 3rd attribute buffer : normals
 		glEnableVertexAttribArray(2);
 		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 		glVertexAttribPointer(
-			2,                                // attribute
-			3,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
+			2,									// attribute
+			3,									// size
+			GL_FLOAT,					// type
+			GL_FALSE,					// normalized?
+			0,									// stride
+			(void*)0						// array buffer offset
 		);
 
+		// Index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
-		// Draw the triangle
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+		glDrawElements(
+			GL_TRIANGLES,		// mode
+			objFaces.size(),			// count
+			GL_UNSIGNED_INT,	// type
+			(void*)0						// element array buffer offset
+		);
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
@@ -390,18 +341,14 @@ int main(int argc, char* argv[]) {
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &colorbuffer);
+	/*glDeleteBuffers(1, &uvbuffer);*/
 	glDeleteBuffers(1, &normalbuffer);
+	glDeleteBuffers(1, &elementbuffer);
 	glDeleteProgram(programID);
-	glDeleteProgram(depthProgramID);
 	glDeleteVertexArrays(1, &VertexArrayID);
-
-	glDeleteFramebuffers(1, &FramebufferName);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
 
 	return 0;
 }
-
-*/

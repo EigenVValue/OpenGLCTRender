@@ -14,4 +14,4 @@ glm::vec3 getModelScaling();
 void mouse_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
-#endif
+#endif // CONTROLSFORFOV_HPP

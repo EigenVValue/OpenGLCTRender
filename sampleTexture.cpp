@@ -1,3 +1,4 @@
+/*
 // Include standard liabraries
 #include <vector>
 #include <filesystem>
@@ -6,11 +7,11 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-// GLFWd
+// GLFW
 #include <GLFW/glfw3.h>
 GLFWwindow* window;
 
-// Include GLM
+// GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -29,23 +30,51 @@ using namespace glm;
 #include <getUVs.hpp>
 
 // Include dcmToModel
-#include "example.h"
+#include "dependencies/include/converttobmp.h"
+#include "getImageData.h"
+#include "dcmToModel.hpp"
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
-const std::string PATH = "D://VS//Project//dualmc-master//data//CT4.raw";
-const unsigned int SIZE[3] = { 256,256,201 };
-const float ISO = 0.8f;
+const char* PATH // DCM path
+	= "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
+const float ISO = 0.8f;	// Threshold
 
-void dcmToModel(const std::string path,
-	const unsigned int *size,
+// Convert dcm files to obj model
+void dcmFileToModel(
+	const char* path,
 	const float iso,
 	std::vector<glm::vec3> & objVertices,
 	std::vector<unsigned int> & objFaces
 ) {
-	DualMCExample example;
-	example.run(path, size, iso, objVertices, objFaces);
+	// Set x, y, z and data
+	unsigned int dimX=0;
+	unsigned int dimY=0;
+	unsigned int dimZ=0;
+	std::vector<uint8_t> raw;
+
+	// Convert dcm files to raw file
+	getImageData(
+		path,
+		raw,
+		dimX,
+		dimY,
+		dimZ
+	);
+	printf("%s", "Get image done.\n");
+
+	// Convert raw file to obj model
+	dcmToModel dcm2Model;
+	dcm2Model.run(
+		raw,
+		dimX,
+		dimY,
+		dimZ,
+		iso,
+		objVertices,
+		objFaces
+	);
 }
 
 // MAIN function
@@ -81,7 +110,7 @@ int main(int argc, char* argv[]) {
 	// Hide the mouse and enable unlimited mouvement
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	// set background
+	// Set background color
 	glClearColor(0.467f, 0.467f, 0.467f, 0.0f);
 
 	// Enable depth test
@@ -102,12 +131,13 @@ int main(int argc, char* argv[]) {
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
-	// Get vertex via loading obj file
+	// Get vertex via loading raw file
 	std::vector<glm::vec3> objVertices;
 	std::vector<unsigned int> objFaces;
+	dcmFileToModel(PATH, ISO, objVertices, objFaces);
 
-	/*
 	// Load obj no need for now
+	/*
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
@@ -122,12 +152,6 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 	}*/
-
-	// Load obj
-	{
-		// Load raw file
-		dcmToModel(PATH, SIZE, ISO, objVertices, objFaces);
-	}
 
 	// Get vertex
 	//objVerticesToGLVertices(vertices, objVertices, objFaces);
@@ -158,20 +182,18 @@ int main(int argc, char* argv[]) {
 	// Vertex normal vector
 	normals = getVertexNormals(objVertices, objFaces);
 
-	getUVs(vertices, vec3(1, 0, 0), uvs);
+	/*getUVs(vertices, vec3(1, 0, 0), uvs);*/
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	
-	GLuint uvbuffer;
+	/*GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);*/
 	
-
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
@@ -273,16 +295,16 @@ int main(int argc, char* argv[]) {
 		);
 		
 		// 2nd attribute buffer : UVs
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glVertexAttribPointer(
-			1,									// attribute. No particular reason for 1, but must match the layout in the shader.
-			2,									// size : U+V => 2
-			GL_FLOAT,					// type
-			GL_FALSE,					// normalized?
-			0,									// stride
-			(void*)0						// array buffer offset
-		);
+		//glEnableVertexAttribArray(1);
+		//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		//glVertexAttribPointer(
+		//	1,									// attribute. No particular reason for 1, but must match the layout in the shader.
+		//	2,									// size : U+V => 2
+		//	GL_FLOAT,					// type
+		//	GL_FALSE,					// normalized?
+		//	0,									// stride
+		//	(void*)0						// array buffer offset
+		//);
 		
 		// 3rd attribute buffer : normals
 		glEnableVertexAttribArray(2);
@@ -320,7 +342,7 @@ int main(int argc, char* argv[]) {
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &uvbuffer);
+	/*glDeleteBuffers(1, &uvbuffer);*/
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteBuffers(1, &elementbuffer);
 	glDeleteProgram(programID);
@@ -331,3 +353,4 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+*/

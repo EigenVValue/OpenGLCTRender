@@ -77,11 +77,11 @@ void main()
 
 	// Three light point
 	// Side light with light power 180 & 120 (in 255).
-	vec3 result = calLight(LightDirection_cameraspace, LightPosition_worldspace, 180f);
-	result = result + calLight(LightDirection_cameraspace2, LightPosition_worldspace2, 120f);
+	vec3 result = calLight(LightDirection_cameraspace, LightPosition_worldspace, 180);
+	result = result + calLight(LightDirection_cameraspace2, LightPosition_worldspace2, 120);
 
 	// Back light with light power 60 (in 255).
-	result = result + calLight(LightDirection_cameraspace3, LightPosition_worldspace3, 70f);
+	result = result + calLight(LightDirection_cameraspace3, LightPosition_worldspace3, 70);
 	
 	// Frag color
 	color = ambient + result;

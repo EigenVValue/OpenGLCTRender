@@ -48,7 +48,10 @@
     <ClCompile Include="sampleTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="example.cpp">
+    <ClCompile Include="getImageData.cpp">
+      <Filter>DcmToModel</Filter>
+    </ClCompile>
+    <ClCompile Include="dcmToModel.cpp">
       <Filter>DcmToModel</Filter>
     </ClCompile>
   </ItemGroup>
@@ -94,17 +97,22 @@
     <ClInclude Include="getUVs.hpp">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="example.h">
-      <Filter>DcmToModel</Filter>
-    </ClInclude>
     <ClInclude Include="dualmc.h">
       <Filter>DcmToModel</Filter>
     </ClInclude>
     <ClInclude Include="dualmc.hpp">
       <Filter>DcmToModel</Filter>
     </ClInclude>
-    <ClInclude Include="dualmc_tables.hpp">
+    <ClInclude Include="getImageData.h">
       <Filter>DcmToModel</Filter>
     </ClInclude>
+    <ClInclude Include="dcmToModel.hpp">
+      <Filter>DcmToModel</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="dual.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

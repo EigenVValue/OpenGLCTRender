@@ -12,4 +12,4 @@ void objVerticesToGLVertices(
 	const std::vector<glm::vec3> & objVertices,
 	const std::vector<unsigned int> & objFaces);
 
-#endif
+#endif // LOADOBJ_HPP
