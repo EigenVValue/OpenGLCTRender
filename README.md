@@ -5,6 +5,7 @@ This project is used to study OpenGL and do the whole rendering.
 It starts take obj file from fiji 3d viewer.  
 Thanks to http://www.opengl-tutorial.org/.  
 And my professor, TA and friends.  
+dualmc.h and dualmc.hpp are thirdparty files.  
 
 Demo.cpp is the main function.  
 test.cpp is the main function used to add and test new function.  
@@ -13,8 +14,8 @@ dependencies folder includes GLFW, GLEW and GLM.
 
 How to play:
 sample obj is the cube.obj file, add it into x64\release\img folder.  
-You can choose <font color= #FF0000>CONTROLS.CPP</font>. It rotates model so you can see immersive light.  
-<font color= #FF0000>CONTROLSFORFOV.CPP</font> rotates the view matrix so it is much faster to run than controls. But light will not change.  
+You can choose CONTROLS.CPP. It rotates model so you can see immersive light.  
+CONTROLSFORFOV.CPP rotates the view matrix so it is much faster to run than controls. But light will not change.  
 Scroll mouse to scale view Matrix.  
 Click the mouse and move it to rotate your point of view.  
 ↑↓←→ up, down, left and right. (Not available now)   
@@ -26,7 +27,7 @@ Initialization:
 2.  Create a background.
 3.  Load vertex shader and fragment shader.
 4.  Create MVP, view and model matrix.
-5.  Load cube.obj to get vertices.
+5.  Load a folder with several dcm files to get model.
 6.  Scale down vertices and get pivot.
 7.  Calculate weighted vertex normal vector OR surface normal vector.
 8.  Set colors.
@@ -45,3 +46,4 @@ TODO:
 [ ] add shadow    
 [ ] add quaternions   
 [X] add FOV control   
+[ ] remove dcm noise  
