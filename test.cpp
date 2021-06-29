@@ -64,6 +64,7 @@ void dcmFileToModel(
 	printf("%s", "Get image done.\n");
 
 	// Convert raw file to obj model
+	// Use Marching Cubes Algorithm
 	dcmToModel dcm2Model;
 	dcm2Model.run(
 		raw,

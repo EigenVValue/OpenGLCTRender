@@ -20,22 +20,19 @@
 // In uint8_t type
 class dualmc {
 public:
-	typedef float VertexComponentsType;
-	typedef int32_t QuadIndexType;
-
 	// vertex structure for dual points
 	struct Vertex {
 		// non-initializing constructor
 		Vertex();
 
 		// initializing constructor
-		Vertex(VertexComponentsType x, VertexComponentsType y, VertexComponentsType z);
+		Vertex(float x, float y, float z);
 
 		// initializing constructor
 		Vertex(const Vertex & v);
 
 		// components
-		VertexComponentsType x, y, z;
+		float x, y, z;
 	};
 
 	/// quad indices structure
@@ -44,27 +41,24 @@ public:
 		Quad();
 
 		// initializing constructor
-		Quad(QuadIndexType i0, QuadIndexType i1, QuadIndexType i2, QuadIndexType i3);
+		Quad(int32_t i0, int32_t i1, int32_t i2, int32_t i3);
 
 		// quad indices
-		QuadIndexType i0, i1, i2, i3;
+		int32_t i0, i1, i2, i3;
 	};
 
 public:
-	// typedefs
-	typedef uint8_t VolumeDataType;
-
 	/// Extracts the iso surface for a given volume and iso value.
 	/// Output is a list of vertices and a list of indices, which connect
 	/// vertices to quads.
 	/// The quad mesh either uses shared vertex indices or is a quad soup if
 	/// desired.
 	void build(
-		const VolumeDataType * data,
+		const uint8_t * data,
 		const int32_t dimX,
 		const int32_t dimY,
 		const int32_t dimZ,
-		const VolumeDataType iso,
+		const uint8_t iso,
 		std::vector<dualmc::Vertex> & vertices,
 		std::vector<dualmc::Quad> & quads
 	);
@@ -72,7 +66,7 @@ public:
 private:
 	/// Extract quad mesh with shared vertex indices.
 	void buildSharedVerticesQuads(
-		const VolumeDataType iso,
+		const uint8_t iso,
 		std::vector<Vertex> & vertices,
 		std::vector<Quad> & quads
 	);
@@ -103,7 +97,7 @@ private:
 		const int32_t cx,
 		const int32_t cy,
 		const int32_t cz,
-		const VolumeDataType iso
+		const uint8_t iso
 	) const;
 
 	/// Get the 12-bit dual point code mask, which encodes the traditional
@@ -115,7 +109,7 @@ private:
 		const int32_t cx,
 		const int32_t cy,
 		const int32_t cz,
-		const VolumeDataType iso,
+		const uint8_t iso,
 		const DMCEdgeCode edge
 	) const;
 
@@ -124,7 +118,7 @@ private:
 		const int32_t cx,
 		const int32_t cy,
 		const int32_t cz,
-		const VolumeDataType iso,
+		const uint8_t iso,
 		const int pointCode,
 		Vertex &v
 	) const;
@@ -132,11 +126,11 @@ private:
 	/// Get the shared index of a dual point which is uniquly identified by its
 	/// cell cube index and a cube edge. The dual point is computed,
 	/// if it has not been computed before.
-	QuadIndexType getSharedDualPointIndex(
+	int32_t getSharedDualPointIndex(
 		const int32_t cx, 
 		const int32_t cy, 
 		const int32_t cz,
-		const VolumeDataType iso,
+		const uint8_t iso,
 		const DMCEdgeCode edge,
 		std::vector<Vertex> & vertices
 	);
@@ -145,7 +139,6 @@ private:
 	int32_t gA(const int32_t x, const int32_t y, const int32_t z) const;
 
 private:
-
 	/// Dual Marching Cubes table
 	/// Encodes the edge vertices for the 256 marching cubes cases.
 	/// A marching cube case produces up to four faces and ,thus, up to four
@@ -432,12 +425,11 @@ private:
 	};
 
 private:
-
 	/// convenience volume extent array for x-,y-, and z-dimension
 	int32_t dims[3];
 
 	/// convenience volume data point
-	const VolumeDataType * data;
+	const uint8_t * data;
 
 	/// Dual point key structure for hashing of shared vertices
 	struct DualPointKey {
@@ -457,7 +449,7 @@ private:
 	};
 
 	/// Hash map for shared vertex index computations
-	std::unordered_map<DualPointKey, QuadIndexType, DualPointKeyHash> pointToIndex;
+	std::unordered_map<DualPointKey, int32_t, DualPointKeyHash> pointToIndex;
 };
 
 // inline function definitions
@@ -468,9 +460,9 @@ inline dualmc::Vertex::Vertex() {}
 //------------------------------------------------------------------------------
 
 inline dualmc::Vertex::Vertex(
-	VertexComponentsType x,
-	VertexComponentsType y,
-	VertexComponentsType z
+	float x,
+	float y,
+	float z
 ) : x(x), y(y), z(z) {}
 
 //------------------------------------------------------------------------------
@@ -484,10 +476,10 @@ inline dualmc::Quad::Quad() {}
 //------------------------------------------------------------------------------
 
 inline dualmc::Quad::Quad(
-	QuadIndexType i0,
-	QuadIndexType i1,
-	QuadIndexType i2,
-	QuadIndexType i3
+	int32_t i0,
+	int32_t i1,
+	int32_t i2,
+	int32_t i3
 ) : i0(i0), i1(i1), i2(i2), i3(i3) {}
 
 //------------------------------------------------------------------------------

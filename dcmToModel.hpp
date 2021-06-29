@@ -16,7 +16,7 @@ public:
 		std::vector<unsigned int> & objFaces
 	);
 
-	// volume for saving raw data
+	// Volume for saving raw data
 	struct Volume {
 		int32_t dimX;
 		int32_t dimY;

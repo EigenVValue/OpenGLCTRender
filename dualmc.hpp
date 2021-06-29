@@ -1,6 +1,6 @@
-// Copyright (C) 2017, Dominik Wodniok
-// This software may be modified and distributed under the terms
-// of the BSD 3-Clause license. See the LICENSE.txt file for details.
+/// Copyright (C) 2017, Dominik Wodniok
+/// This software may be modified and distributed under the terms
+/// of the BSD 3-Clause license. See the LICENSE.txt file for details.
 
 /// \file   dualmc.tpp
 /// \author Dominik Wodniok
@@ -8,35 +8,35 @@
 
 #include "dualmc.h"
 
-//------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 
 void dualmc::build(
-	const VolumeDataType * data,
+	const uint8_t * data,
 	const int32_t dimX,
 	const int32_t dimY,
 	const int32_t dimZ,
-	const VolumeDataType iso,
+	const uint8_t iso,
 	std::vector<dualmc::Vertex> & vertices,
 	std::vector<dualmc::Quad> & quads
 ) {
 
-	// set members
+	/// set members
 	this->dims[0] = dimX;
 	this->dims[1] = dimY;
 	this->dims[2] = dimZ;
 	this->data = data;
 
-	// clear vertices and quad indices
+	/// clear vertices and quad indices
 	vertices.clear();
 	quads.clear();
 
 	buildSharedVerticesQuads(iso, vertices, quads);
 }
 
-//------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 
 void dualmc::buildSharedVerticesQuads(
-	VolumeDataType const iso,
+	uint8_t const iso,
 	std::vector<dualmc::Vertex> & vertices,
 	std::vector<dualmc::Quad> & quads
 ) {
@@ -44,20 +44,20 @@ void dualmc::buildSharedVerticesQuads(
 	int32_t const reducedY = dims[1] - 2;
 	int32_t const reducedZ = dims[2] - 2;
 
-	QuadIndexType i0, i1, i2, i3;
+	int32_t i0, i1, i2, i3;
 
 	pointToIndex.clear();
 
-	// iterate voxels
+	/// iterate voxels
 	for (int32_t z = 0; z < reducedZ; ++z)
 		for (int32_t y = 0; y < reducedY; ++y)
 			for (int32_t x = 0; x < reducedX; ++x) {
-				// construct quads for x edge
+				/// construct quads for x edge
 				if (z > 0 && y > 0) {
 					bool const entering = data[gA(x, y, z)] < iso && data[gA(x + 1, y, z)] >= iso;
 					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x + 1, y, z)] < iso;
 					if (entering || exiting) {
-						// generate quad
+						/// generate quad
 						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE0, vertices);
 						i1 = getSharedDualPointIndex(x, y, z - 1, iso, EDGE2, vertices);
 						i2 = getSharedDualPointIndex(x, y - 1, z - 1, iso, EDGE6, vertices);
@@ -72,7 +72,7 @@ void dualmc::buildSharedVerticesQuads(
 					}
 				}
 
-				// construct quads for y edge
+				/// construct quads for y edge
 				if (z > 0 && x > 0) {
 					bool const entering = data[gA(x, y, z)] < iso && data[gA(x, y + 1, z)] >= iso;
 					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x, y + 1, z)] < iso;
@@ -92,7 +92,7 @@ void dualmc::buildSharedVerticesQuads(
 					}
 				}
 
-				// construct quads for z edge
+				/// construct quads for z edge
 				if (x > 0 && y > 0) {
 					bool const entering = data[gA(x, y, z)] < iso && data[gA(x, y, z + 1)] >= iso;
 					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x, y, z + 1)] < iso;
@@ -114,30 +114,31 @@ void dualmc::buildSharedVerticesQuads(
 			}
 }
 
-//------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 
-dualmc::QuadIndexType dualmc::getSharedDualPointIndex(
+int32_t dualmc::getSharedDualPointIndex(
 	const int32_t cx,
 	const int32_t cy,
 	const int32_t cz,
-	const VolumeDataType iso,
+	const uint8_t iso,
 	const DMCEdgeCode edge,
 	std::vector<Vertex> & vertices
 ) {
-	// create a key for the dual point from its linearized cell ID and point code
+	/// create a key for the dual point from its linearized cell ID and point code
 	DualPointKey key;
 	key.linearizedCellID = gA(cx, cy, cz);
 	key.pointCode = getDualPointCode(cx, cy, cz, iso, edge);
 
-	// have we already computed the dual point?
+	/// have we already computed the dual point?
+	// pointToIndex -> hash table
 	auto iterator = pointToIndex.find(key);
 	if (iterator != pointToIndex.end()) {
-		// just return the dual point index
+		/// just return the dual point index
 		return iterator->second;
 	}
 	else {
-		// create new vertex and vertex id
-		QuadIndexType newVertexId = vertices.size();
+		/// create new vertex and vertex id
+		int32_t newVertexId = vertices.size();
 		vertices.emplace_back();
 		calculateDualPoint(
 			cx,
@@ -147,19 +148,19 @@ dualmc::QuadIndexType dualmc::getSharedDualPointIndex(
 			key.pointCode, // key.pointCode = getDualPointCode(cx, cy, cz, iso, edge);
 			vertices.back()
 		);
-		// insert vertex ID into map and also return it
+		/// insert vertex ID into map and also return it
 		pointToIndex[key] = newVertexId;
 		return newVertexId;
 	}
 }
 
-//------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 
 int dualmc::getDualPointCode(
 	const int32_t cx,
 	const int32_t cy,
 	const int32_t cz,
-	const VolumeDataType iso,
+	const uint8_t iso,
 	const DMCEdgeCode edge
 ) const {
 	int cubeCode = getCellCode(cx, cy, cz, iso);
@@ -171,17 +172,18 @@ int dualmc::getDualPointCode(
 	return 0;
 }
 
-//------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 
 int dualmc::getCellCode(
 	const int32_t cx, 
 	const int32_t cy,
 	const int32_t cz, 
-	const VolumeDataType iso
+	const uint8_t iso
 ) const {
-	// determine for each cube corner if it is outside or inside
+	/// determine for each cube corner if it is outside or inside
 	int code = 0;
 	if (data[gA(cx, cy, cz)] >= iso)
+		// Code += b
 		code |= 1;
 	if (data[gA(cx + 1, cy, cz)] >= iso)
 		code |= 2;
@@ -200,30 +202,30 @@ int dualmc::getCellCode(
 	return code;
 }
 
-//------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 
 void dualmc::calculateDualPoint(
 	const int32_t cx,
 	const int32_t cy,
 	const int32_t cz,
-	const VolumeDataType iso,
+	const uint8_t iso,
 	const int pointCode, 
 	Vertex & v
 ) const {
-	// initialize the point with lower voxel coordinates
+	/// initialize the point with lower voxel coordinates
 	v.x = cx;
 	v.y = cy;
 	v.z = cz;
 
-	// compute the dual point as the mean of the face vertices belonging to the
-	// original marching cubes face
+	/// compute the dual point as the mean of the face vertices belonging to the
+	/// original marching cubes face
 	Vertex p;
 	p.x = 0;
 	p.y = 0;
 	p.z = 0;
 	int points = 0;
 
-	// sum edge intersection vertices using the point code
+	/// sum edge intersection vertices using the point code
 	if (pointCode & EDGE0) {
 		p.x += ((float)iso	- (float)data[gA(cx, cy, cz)]) 
 			/ ((float)data[gA(cx + 1, cy, cz)] - (float)data[gA(cx, cy, cz)]);
@@ -308,13 +310,13 @@ void dualmc::calculateDualPoint(
 		points++;
 	}
 
-	// divide by number of accumulated points
+	/// divide by number of accumulated points
 	float invPoints = 1.0f / (float)points;
 	p.x *= invPoints;
 	p.y *= invPoints;
 	p.z *= invPoints;
 
-	// offset point by voxel coordinates
+	/// offset point by voxel coordinates
 	v.x += p.x;
 	v.y += p.y;
 	v.z += p.z;
