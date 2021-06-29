@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
 	dcmFileToModel(PATH, ISO, objVertices, objFaces);
 
 	// Load obj no need for now
-	/*
+	
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
 			printf("loadOBJ fail!");
 			return 0;
 		}
-	}*/
+	}
 
 	// Get vertex
 	//objVerticesToGLVertices(vertices, objVertices, objFaces);
@@ -182,17 +182,17 @@ int main(int argc, char* argv[]) {
 	// Vertex normal vector
 	normals = getVertexNormals(objVertices, objFaces);
 
-	/*getUVs(vertices, vec3(1, 0, 0), uvs);*/
+	//getUVs(vertices, vec3(1, 0, 0), uvs);
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	/*GLuint uvbuffer;
+	GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);*/
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);
@@ -342,7 +342,7 @@ int main(int argc, char* argv[]) {
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	/*glDeleteBuffers(1, &uvbuffer);*/
+	//glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteBuffers(1, &elementbuffer);
 	glDeleteProgram(programID);

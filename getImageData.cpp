@@ -49,7 +49,5 @@ void getImageData(
 			}
 		}
 	}
-	
-	// TODO: remove noise.
 
 }

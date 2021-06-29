@@ -13,7 +13,8 @@ public:
 		unsigned int &dimZ,
 		const float iso,
 		std::vector<glm::vec3> & objVertices,
-		std::vector<unsigned int> & objFaces
+		std::vector<unsigned int> & objFaces,
+		std::vector<uint8_t> & objColors
 	);
 
 	// Volume for saving raw data
@@ -29,7 +30,8 @@ private:
 	void computeSurface(
 		Volume volume,
 		std::vector<dualmc::Vertex> &vertices,
-		std::vector<dualmc::Quad> &quads
+		std::vector<dualmc::Quad> &quads,
+		std::vector<uint8_t> & colors
 	);
 };
 

@@ -60,7 +60,8 @@ public:
 		const int32_t dimZ,
 		const uint8_t iso,
 		std::vector<dualmc::Vertex> & vertices,
-		std::vector<dualmc::Quad> & quads
+		std::vector<dualmc::Quad> & quads,
+		std::vector<uint8_t> & colors
 	);
 
 private:
@@ -68,7 +69,8 @@ private:
 	void buildSharedVerticesQuads(
 		const uint8_t iso,
 		std::vector<Vertex> & vertices,
-		std::vector<Quad> & quads
+		std::vector<Quad> & quads,
+		std::vector<uint8_t> & colors
 	);
 
 private:
@@ -120,7 +122,8 @@ private:
 		const int32_t cz,
 		const uint8_t iso,
 		const int pointCode,
-		Vertex &v
+		Vertex &v,
+		uint8_t & color
 	) const;
 
 	/// Get the shared index of a dual point which is uniquly identified by its
@@ -132,7 +135,8 @@ private:
 		const int32_t cz,
 		const uint8_t iso,
 		const DMCEdgeCode edge,
-		std::vector<Vertex> & vertices
+		std::vector<Vertex> & vertices,
+		std::vector<uint8_t> & colors
 	);
 
 	/// Compute a linearized cell cube index.

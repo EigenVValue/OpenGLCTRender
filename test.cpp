@@ -45,7 +45,8 @@ void dcmFileToModel(
 	const char* path,
 	const float iso,
 	std::vector<glm::vec3> & objVertices,
-	std::vector<unsigned int> & objFaces
+	std::vector<unsigned int> & objFaces,
+	std::vector<uint8_t> & objColors
 ) {
 	// Set x, y, z and data
 	unsigned int dimX = 0;
@@ -73,7 +74,8 @@ void dcmFileToModel(
 		dimZ,
 		iso,
 		objVertices,
-		objFaces
+		objFaces,
+		objColors
 	);
 }
 
@@ -128,13 +130,13 @@ int main(int argc, char* argv[]) {
 
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
+	std::vector<unsigned int> faces;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
 	// Get vertex via loading raw file
-	std::vector<glm::vec3> objVertices;
-	std::vector<unsigned int> objFaces;
-	dcmFileToModel(PATH, ISO, objVertices, objFaces);
+	std::vector<uint8_t> colors;
+	dcmFileToModel(PATH, ISO, vertices, faces, colors);
 
 	// Load obj no need for now
 	/*
@@ -158,41 +160,40 @@ int main(int argc, char* argv[]) {
 	{
 		// Get pivot Need change
 		float pivot[3] = { 0.0f };
-		for (auto & vertex : objVertices) {
+		for (auto & vertex : vertices) {
 			// Add up
 			pivot[0] += vertex.x;
 			pivot[1] += vertex.y;
 			pivot[2] += vertex.z;
 		}
-		pivot[0] /= objVertices.size();
-		pivot[1] /= objVertices.size();
-		pivot[2] /= objVertices.size();
+		pivot[0] /= vertices.size();
+		pivot[1] /= vertices.size();
+		pivot[2] /= vertices.size();
 
-		for (auto & vertex : objVertices) {
+		for (auto & vertex : vertices) {
 			vertex.x -= pivot[0];
 			vertex.y -= pivot[1];
 			vertex.z -= pivot[2];
 		}
 	}
-	vertices = objVertices;
 
 	// Get normal
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
-	normals = getVertexNormals(objVertices, objFaces);
+	normals = getVertexNormals(vertices, faces);
 
-	/*getUVs(vertices, vec3(1, 0, 0), uvs);*/
+	//getUVs(vertices, colors, uvs);
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	/*GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);*/
+	//GLuint uvbuffer;
+	//glGenBuffers(1, &uvbuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	//glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);
@@ -203,7 +204,7 @@ int main(int argc, char* argv[]) {
 	GLuint elementbuffer;
 	glGenBuffers(1, &elementbuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, objFaces.size() * sizeof(unsigned int), &objFaces[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size() * sizeof(unsigned int), &faces[0], GL_STATIC_DRAW);
 
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
@@ -294,7 +295,7 @@ int main(int argc, char* argv[]) {
 			(void*)0						// array buffer offset
 		);
 
-		// 2nd attribute buffer : UVs
+		//// 2nd attribute buffer : UVs
 		//glEnableVertexAttribArray(1);
 		//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 		//glVertexAttribPointer(
@@ -323,7 +324,7 @@ int main(int argc, char* argv[]) {
 
 		glDrawElements(
 			GL_TRIANGLES,		// mode
-			objFaces.size(),			// count
+			faces.size(),			// count
 			GL_UNSIGNED_INT,	// type
 			(void*)0						// element array buffer offset
 		);
@@ -342,7 +343,7 @@ int main(int argc, char* argv[]) {
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	/*glDeleteBuffers(1, &uvbuffer);*/
+	//glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteBuffers(1, &elementbuffer);
 	glDeleteProgram(programID);

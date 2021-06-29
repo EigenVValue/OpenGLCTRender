@@ -17,7 +17,8 @@ void dualmc::build(
 	const int32_t dimZ,
 	const uint8_t iso,
 	std::vector<dualmc::Vertex> & vertices,
-	std::vector<dualmc::Quad> & quads
+	std::vector<dualmc::Quad> & quads,
+	std::vector<uint8_t> & colors
 ) {
 
 	/// set members
@@ -30,7 +31,7 @@ void dualmc::build(
 	vertices.clear();
 	quads.clear();
 
-	buildSharedVerticesQuads(iso, vertices, quads);
+	buildSharedVerticesQuads(iso, vertices, quads, colors);
 }
 
 ///------------------------------------------------------------------------------
@@ -38,7 +39,8 @@ void dualmc::build(
 void dualmc::buildSharedVerticesQuads(
 	uint8_t const iso,
 	std::vector<dualmc::Vertex> & vertices,
-	std::vector<dualmc::Quad> & quads
+	std::vector<dualmc::Quad> & quads,
+	std::vector<uint8_t> & colors
 ) {
 	int32_t const reducedX = dims[0] - 2;
 	int32_t const reducedY = dims[1] - 2;
@@ -58,10 +60,10 @@ void dualmc::buildSharedVerticesQuads(
 					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x + 1, y, z)] < iso;
 					if (entering || exiting) {
 						/// generate quad
-						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE0, vertices);
-						i1 = getSharedDualPointIndex(x, y, z - 1, iso, EDGE2, vertices);
-						i2 = getSharedDualPointIndex(x, y - 1, z - 1, iso, EDGE6, vertices);
-						i3 = getSharedDualPointIndex(x, y - 1, z, iso, EDGE4, vertices);
+						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE0, vertices, colors);
+						i1 = getSharedDualPointIndex(x, y, z - 1, iso, EDGE2, vertices, colors);
+						i2 = getSharedDualPointIndex(x, y - 1, z - 1, iso, EDGE6, vertices, colors);
+						i3 = getSharedDualPointIndex(x, y - 1, z, iso, EDGE4, vertices, colors);
 
 						if (entering) {
 							quads.emplace_back(i0, i1, i2, i3);
@@ -78,10 +80,10 @@ void dualmc::buildSharedVerticesQuads(
 					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x, y + 1, z)] < iso;
 					if (entering || exiting) {
 						// generate quad
-						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE8, vertices);
-						i1 = getSharedDualPointIndex(x, y, z - 1, iso, EDGE11, vertices);
-						i2 = getSharedDualPointIndex(x - 1, y, z - 1, iso, EDGE10, vertices);
-						i3 = getSharedDualPointIndex(x - 1, y, z, iso, EDGE9, vertices);
+						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE8, vertices, colors);
+						i1 = getSharedDualPointIndex(x, y, z - 1, iso, EDGE11, vertices, colors);
+						i2 = getSharedDualPointIndex(x - 1, y, z - 1, iso, EDGE10, vertices, colors);
+						i3 = getSharedDualPointIndex(x - 1, y, z, iso, EDGE9, vertices, colors);
 
 						if (exiting) {
 							quads.emplace_back(i0, i1, i2, i3);
@@ -98,10 +100,10 @@ void dualmc::buildSharedVerticesQuads(
 					bool const exiting = data[gA(x, y, z)] >= iso && data[gA(x, y, z + 1)] < iso;
 					if (entering || exiting) {
 						// generate quad
-						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE3, vertices);
-						i1 = getSharedDualPointIndex(x - 1, y, z, iso, EDGE1, vertices);
-						i2 = getSharedDualPointIndex(x - 1, y - 1, z, iso, EDGE5, vertices);
-						i3 = getSharedDualPointIndex(x, y - 1, z, iso, EDGE7, vertices);
+						i0 = getSharedDualPointIndex(x, y, z, iso, EDGE3, vertices, colors);
+						i1 = getSharedDualPointIndex(x - 1, y, z, iso, EDGE1, vertices, colors);
+						i2 = getSharedDualPointIndex(x - 1, y - 1, z, iso, EDGE5, vertices, colors);
+						i3 = getSharedDualPointIndex(x, y - 1, z, iso, EDGE7, vertices, colors);
 
 						if (exiting) {
 							quads.emplace_back(i0, i1, i2, i3);
@@ -122,7 +124,8 @@ int32_t dualmc::getSharedDualPointIndex(
 	const int32_t cz,
 	const uint8_t iso,
 	const DMCEdgeCode edge,
-	std::vector<Vertex> & vertices
+	std::vector<Vertex> & vertices,
+	std::vector<uint8_t> & colors
 ) {
 	/// create a key for the dual point from its linearized cell ID and point code
 	DualPointKey key;
@@ -140,13 +143,15 @@ int32_t dualmc::getSharedDualPointIndex(
 		/// create new vertex and vertex id
 		int32_t newVertexId = vertices.size();
 		vertices.emplace_back();
+		colors.emplace_back();
 		calculateDualPoint(
 			cx,
 			cy,
 			cz,
 			iso,
 			key.pointCode, // key.pointCode = getDualPointCode(cx, cy, cz, iso, edge);
-			vertices.back()
+			vertices.back(),
+			colors.back()
 		);
 		/// insert vertex ID into map and also return it
 		pointToIndex[key] = newVertexId;
@@ -210,12 +215,16 @@ void dualmc::calculateDualPoint(
 	const int32_t cz,
 	const uint8_t iso,
 	const int pointCode, 
-	Vertex & v
+	Vertex & v,
+	uint8_t & color
 ) const {
 	/// initialize the point with lower voxel coordinates
 	v.x = cx;
 	v.y = cy;
 	v.z = cz;
+
+	// Get UV(obj) color
+	color = data[gA(cx, cy, cz)];
 
 	/// compute the dual point as the mean of the face vertices belonging to the
 	/// original marching cubes face

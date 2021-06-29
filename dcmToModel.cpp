@@ -17,7 +17,8 @@ void dcmToModel::run(
 	unsigned int &dimZ,
 	const float iso,
 	std::vector<glm::vec3> & objVertices,
-	std::vector<unsigned int> & objFaces
+	std::vector<unsigned int> & objFaces,
+	std::vector<uint8_t> & objColors
 ) {
 	// Set volume
 	Volume volume;
@@ -36,7 +37,7 @@ void dcmToModel::run(
 	std::vector<dualmc::Quad> quads;
 
 	// Compute surface
-	computeSurface(volume, vertices, quads);
+	computeSurface(volume, vertices, quads, objColors);
 
 	// Get vertices
 	for (auto const & v : vertices) {
@@ -68,7 +69,8 @@ void dcmToModel::run(
 void dcmToModel::computeSurface(
 	Volume volume,
 	std::vector<dualmc::Vertex> &vertices,
-	std::vector<dualmc::Quad> &quads
+	std::vector<dualmc::Quad> &quads,
+	std::vector<uint8_t> & colors
 ) {
 	printf("%s" ,"Computing surface...\n");
 	dualmc builder;
@@ -79,7 +81,8 @@ void dcmToModel::computeSurface(
 		volume.dimZ,
 		volume.iso * std::numeric_limits<uint8_t>::max(),
 		vertices,
-		quads
+		quads,
+		colors
 	);
 	printf("%s", "Computing surface done.\n");
 }
