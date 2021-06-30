@@ -23,14 +23,14 @@ Click the mouse and move it to rotate your point of view.
 Pipeline:
 Initialization:
 
-1.  Initialize GLEW, GLFW and glm.
-2.  Create a background.
-3.  Load vertex shader and fragment shader.
-4.  Create MVP, view and model matrix.
-5.  Load a folder with several dcm files to get model.
-6.  Scale down vertices and get pivot.
-7.  Calculate weighted vertex normal vector OR surface normal vector.
-8.  Set colors.
+1.  Initialize GLEW, GLFW and glm.  
+2.  Create a background.  
+3.  Load vertex shader and fragment shader.  
+4.  Create MVP, view and model matrix.  
+5.  Load a folder with several dcm files to get model.  
+6.  Scale down vertices and get pivot.  
+7.  Calculate weighted vertex normal vector OR surface normal vector.  
+8.  Get texture via CT number of each vertex.  
 
 Rendering:
 9.  Do a flexible MVP matrix.
