@@ -46,13 +46,16 @@ void dcmFileToModel(
 	const float iso,
 	std::vector<glm::vec3> & objVertices,
 	std::vector<unsigned int> & objFaces,
-	std::vector<uint8_t> & objColors
+	std::vector<int> & colors
 ) {
 	// Set x, y, z and data
 	unsigned int dimX = 0;
 	unsigned int dimY = 0;
 	unsigned int dimZ = 0;
 	std::vector<uint8_t> raw;
+	// Set parameter to convert Grayscale to CT number
+	int rescale_intercept = 0;
+	unsigned short rescale_slope = 0;
 
 	// Convert dcm files to raw file
 	getImageData(
@@ -60,7 +63,9 @@ void dcmFileToModel(
 		raw,
 		dimX,
 		dimY,
-		dimZ
+		dimZ,
+		rescale_intercept,
+		rescale_slope
 	);
 	printf("%s", "Get image done.\n");
 
@@ -75,7 +80,9 @@ void dcmFileToModel(
 		iso,
 		objVertices,
 		objFaces,
-		objColors
+		colors,
+		rescale_intercept,
+		rescale_slope
 	);
 }
 
@@ -133,9 +140,9 @@ int main(int argc, char* argv[]) {
 	std::vector<unsigned int> faces;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
+	std::vector<int> colors;
 
 	// Get vertex via loading raw file
-	std::vector<uint8_t> colors;
 	dcmFileToModel(PATH, ISO, vertices, faces, colors);
 
 	// Load obj no need for now
@@ -183,17 +190,17 @@ int main(int argc, char* argv[]) {
 	// Vertex normal vector
 	normals = getVertexNormals(vertices, faces);
 
-	//getUVs(vertices, colors, uvs);
+	getUVs(vertices, colors, uvs);
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	//GLuint uvbuffer;
-	//glGenBuffers(1, &uvbuffer);
-	//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	//glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
 	GLuint normalbuffer;
 	glGenBuffers(1, &normalbuffer);
@@ -224,9 +231,9 @@ int main(int argc, char* argv[]) {
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
-		currPath += "\\img\\uvmap.DDS";
+		currPath += "\\img\\Texture.bmp";
 		char* path = currPath.string().data();
-		Texture = loadDDS(path);
+		Texture = loadBMP(path);
 	}
 
 	// Get a handle for our "myTextureSampler" uniform
@@ -295,17 +302,17 @@ int main(int argc, char* argv[]) {
 			(void*)0						// array buffer offset
 		);
 
-		//// 2nd attribute buffer : UVs
-		//glEnableVertexAttribArray(1);
-		//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		//glVertexAttribPointer(
-		//	1,									// attribute. No particular reason for 1, but must match the layout in the shader.
-		//	2,									// size : U+V => 2
-		//	GL_FLOAT,					// type
-		//	GL_FALSE,					// normalized?
-		//	0,									// stride
-		//	(void*)0						// array buffer offset
-		//);
+		// 2nd attribute buffer : UVs
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glVertexAttribPointer(
+			1,									// attribute. No particular reason for 1, but must match the layout in the shader.
+			2,									// size : U+V => 2
+			GL_FLOAT,					// type
+			GL_FALSE,					// normalized?
+			0,									// stride
+			(void*)0						// array buffer offset
+		);
 
 		// 3rd attribute buffer : normals
 		glEnableVertexAttribArray(2);
@@ -343,7 +350,7 @@ int main(int argc, char* argv[]) {
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	//glDeleteBuffers(1, &uvbuffer);
+	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteBuffers(1, &elementbuffer);
 	glDeleteProgram(programID);

@@ -10,7 +10,10 @@ struct DcmData{
 	unsigned short rows;		//像素行数
 	int countImages;			//文件夹下图像个数
 	size_t bufferSize;			//所有像素数据大小
+	int RescaleIntercept;		//Rescale Intercept
+	unsigned short RescaleSlope;			//Rescale Slope
 };
+
 
 //*dcmData: 传入结构体类型的地址，其中DcmData 成员 *buffer 需要手动释放；
 //if success will return zero,else return less than zero; 

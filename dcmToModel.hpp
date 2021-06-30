@@ -8,13 +8,15 @@ class dcmToModel {
 public:
 	void run(
 		const std::vector<uint8_t> raw,
-		unsigned int &dimX,
-		unsigned int &dimY,
-		unsigned int &dimZ,
+		const unsigned int &dimX,
+		const unsigned int &dimY,
+		const unsigned int &dimZ,
 		const float iso,
 		std::vector<glm::vec3> & objVertices,
 		std::vector<unsigned int> & objFaces,
-		std::vector<uint8_t> & objColors
+		std::vector<int> & colors,
+		const int & rescale_intercept,
+		const unsigned short & rescale_slope
 	);
 
 	// Volume for saving raw data
@@ -28,9 +30,9 @@ public:
 
 private:
 	void computeSurface(
-		Volume volume,
-		std::vector<dualmc::Vertex> &vertices,
-		std::vector<dualmc::Quad> &quads,
+		Volume & volume,
+		std::vector<dualmc::Vertex> & vertices,
+		std::vector<dualmc::Quad> & quads,
 		std::vector<uint8_t> & colors
 	);
 };

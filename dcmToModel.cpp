@@ -12,13 +12,15 @@
 
 void dcmToModel::run(
 	const std::vector<uint8_t> raw,
-	unsigned int &dimX,
-	unsigned int &dimY,
-	unsigned int &dimZ,
+	const unsigned int &dimX,
+	const unsigned int &dimY,
+	const unsigned int &dimZ,
 	const float iso,
 	std::vector<glm::vec3> & objVertices,
 	std::vector<unsigned int> & objFaces,
-	std::vector<uint8_t> & objColors
+	std::vector<int> & colors,
+	const int & rescale_intercept,
+	const unsigned short & rescale_slope
 ) {
 	// Set volume
 	Volume volume;
@@ -36,8 +38,15 @@ void dcmToModel::run(
 	// Array of quad indices for the extracted surface
 	std::vector<dualmc::Quad> quads;
 
+	// Array of colors for the extracted surface
+	std::vector<uint8_t> objColors;
+
 	// Compute surface
 	computeSurface(volume, vertices, quads, objColors);
+
+	// TODO:
+	// Code below is a template way
+	// Need to improve
 
 	// Get vertices
 	for (auto const & v : vertices) {
@@ -64,12 +73,20 @@ void dcmToModel::run(
 		objFaces.push_back(face[3]);
 	}
 
+	// Get colors (CT number)
+	for (auto color : objColors)
+	{
+		// Hu = pixel * slope + intercept
+		int newColor = color * rescale_slope + ((float)rescale_intercept/4096.0f *255.0f);
+		colors.push_back(newColor);
+	}
+
 }
 
 void dcmToModel::computeSurface(
-	Volume volume,
-	std::vector<dualmc::Vertex> &vertices,
-	std::vector<dualmc::Quad> &quads,
+	Volume & volume,
+	std::vector<dualmc::Vertex> & vertices,
+	std::vector<dualmc::Quad> & quads,
 	std::vector<uint8_t> & colors
 ) {
 	printf("%s" ,"Computing surface...\n");

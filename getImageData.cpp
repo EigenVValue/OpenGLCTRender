@@ -9,16 +9,19 @@ void getImageData(
 		std::vector<uint8_t> &raw,
 		unsigned int &dimX,
 		unsigned int &dimY,
-		unsigned int &dimZ
+		unsigned int &dimZ,
+		int &rescale_intercept,
+		unsigned short &rescale_slope
 ){
 	// Struct see converttobmp.h file
-	// struct DcmData {
+	//struct DcmData {
 	//	unsigned char * buffer;		//文件夹下所有图像像素数据
 	//	unsigned short columns;		//像素列数
-	//	unsigned short rows;			//像素行数
-	//	unsigned short bitCount;		//图像位深
-	//	int countImages;					//文件夹下图像个数
-	//	size_t bufferSize;					//所有像素数据大小
+	//	unsigned short rows;		//像素行数
+	//	int countImages;			//文件夹下图像个数
+	//	size_t bufferSize;			//所有像素数据大小
+	//	int RescaleIntercept;		//Rescale Intercept
+	//	unsigned short RescaleSlope;			//Rescale Slope
 	//};
 	DcmData data;
 	int bufferSize = converttobmp(
@@ -26,10 +29,12 @@ void getImageData(
 		&data
 	);
 
-	// set size
+	// get values
 	dimX = data.columns;
 	dimY = data.rows;
 	dimZ = data.countImages;
+	rescale_intercept = data.RescaleIntercept;
+	rescale_slope = data.RescaleSlope;
 
 	// char size == dim of x (height) * dim of y (width) * dim of z(total number of dcm files)
 	raw.resize(data.rows*data.columns*data.countImages);

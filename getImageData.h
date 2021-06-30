@@ -6,7 +6,9 @@ void getImageData(
 	std::vector<uint8_t> &raw,
 	unsigned int &dimX,
 	unsigned int &dimY,
-	unsigned int &dimZ
+	unsigned int &dimZ,
+	int &rescale_intercept,
+	unsigned short &rescale_slope
 );
 
 #endif
