@@ -38,12 +38,12 @@ const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 const char* PATH // DCM path
 = "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
-const float ISO = 0.8f;	// Threshold
+const uint8_t ISO = 204;	// Threshold
 
 // Convert dcm files to obj model
 void dcmFileToModel(
 	const char* path,
-	const float iso,
+	const uint8_t iso,
 	std::vector<glm::vec3> & objVertices,
 	std::vector<unsigned int> & objFaces,
 	std::vector<int> & colors
@@ -161,7 +161,6 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 	}*/
-
 	// Get vertex
 	//objVerticesToGLVertices(vertices, objVertices, objFaces);
 	{
@@ -231,14 +230,13 @@ int main(int argc, char* argv[]) {
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
-		currPath += "\\img\\Texture.bmp";
+		currPath += "\\img\\Texture2.bmp";
 		char* path = currPath.string().data();
 		Texture = loadBMP(path);
 	}
 
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
-
 	printf("Start rendering\n");
 	end = clock();
 	printf("%f", (float)(end - start) / CLOCKS_PER_SEC);
@@ -283,6 +281,7 @@ int main(int argc, char* argv[]) {
 		// Back light
 		glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
 		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
+		
 
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);

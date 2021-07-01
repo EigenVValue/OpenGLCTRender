@@ -39,20 +39,24 @@ const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 const char* PATH // DCM path
 = "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
-const float ISO = 0.8f;	// Threshold
+const uint8_t ISO = 204;	// Threshold
 
 // Convert dcm files to obj model
 void dcmFileToModel(
 	const char* path,
-	const float iso,
+	const uint8_t iso,
 	std::vector<glm::vec3> & objVertices,
-	std::vector<unsigned int> & objFaces
+	std::vector<unsigned int> & objFaces,
+	std::vector<int> & colors
 ) {
 	// Set x, y, z and data
 	unsigned int dimX = 0;
 	unsigned int dimY = 0;
 	unsigned int dimZ = 0;
 	std::vector<uint8_t> raw;
+	// Set parameter to convert Grayscale to CT number
+	int rescale_intercept = 0;
+	unsigned short rescale_slope = 0;
 
 	// Convert dcm files to raw file
 	getImageData(
@@ -60,11 +64,14 @@ void dcmFileToModel(
 		raw,
 		dimX,
 		dimY,
-		dimZ
+		dimZ,
+		rescale_intercept,
+		rescale_slope
 	);
 	printf("%s", "Get image done.\n");
 
 	// Convert raw file to obj model
+	// Use Marching Cubes Algorithm
 	dcmToModel dcm2Model;
 	dcm2Model.run(
 		raw,
@@ -73,7 +80,10 @@ void dcmFileToModel(
 		dimZ,
 		iso,
 		objVertices,
-		objFaces
+		objFaces,
+		colors,
+		rescale_intercept,
+		rescale_slope
 	);
 }
 
@@ -128,16 +138,16 @@ int main(int argc, char* argv[]) {
 
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
+	std::vector<unsigned int> faces;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
+	std::vector<int> colors;
 
 	// Get vertex via loading raw file
-	std::vector<glm::vec3> objVertices;
-	std::vector<unsigned int> objFaces;
-	dcmFileToModel(PATH, ISO, objVertices, objFaces);
+	dcmFileToModel(PATH, ISO, vertices, faces, colors);
 
 	// Load obj no need for now
-	
+	/*
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
@@ -156,33 +166,32 @@ int main(int argc, char* argv[]) {
 	// Get vertex
 	//objVerticesToGLVertices(vertices, objVertices, objFaces);
 	{
-		// Get pivot Need change
-		float pivot[3] = { 0.0f };
-		for (auto & vertex : objVertices) {
-			// Add up
-			pivot[0] += vertex.x;
-			pivot[1] += vertex.y;
-			pivot[2] += vertex.z;
-		}
-		pivot[0] /= objVertices.size();
-		pivot[1] /= objVertices.size();
-		pivot[2] /= objVertices.size();
-
-		for (auto & vertex : objVertices) {
-			vertex.x -= pivot[0];
-			vertex.y -= pivot[1];
-			vertex.z -= pivot[2];
-		}
+	// Get pivot Need change
+	float pivot[3] = { 0.0f };
+	for (auto & vertex : vertices) {
+		// Add up
+		pivot[0] += vertex.x;
+		pivot[1] += vertex.y;
+		pivot[2] += vertex.z;
 	}
-	vertices = objVertices;
+	pivot[0] /= vertices.size();
+	pivot[1] /= vertices.size();
+	pivot[2] /= vertices.size();
+
+	for (auto & vertex : vertices) {
+		vertex.x -= pivot[0];
+		vertex.y -= pivot[1];
+		vertex.z -= pivot[2];
+	}
+	}
 
 	// Get normal
 	// Surface normal vector
 	//normals = getNormals(vertices);
 	// Vertex normal vector
-	normals = getVertexNormals(objVertices, objFaces);
+	normals = getVertexNormals(vertices, faces);
 
-	//getUVs(vertices, vec3(1, 0, 0), uvs);
+	getUVs(vertices, colors, uvs);
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
@@ -203,7 +212,7 @@ int main(int argc, char* argv[]) {
 	GLuint elementbuffer;
 	glGenBuffers(1, &elementbuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, objFaces.size() * sizeof(unsigned int), &objFaces[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size() * sizeof(unsigned int), &faces[0], GL_STATIC_DRAW);
 
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
@@ -223,14 +232,13 @@ int main(int argc, char* argv[]) {
 	{
 		std::filesystem::path currPath = argv[0];
 		currPath = currPath.parent_path();
-		currPath += "\\img\\uvmap.DDS";
+		currPath += "\\img\\Texture2.bmp";
 		char* path = currPath.string().data();
-		Texture = loadDDS(path);
+		Texture = loadBMP(path);
 	}
 
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
-
 	printf("Start rendering\n");
 	end = clock();
 	printf("%f", (float)(end - start) / CLOCKS_PER_SEC);
@@ -295,16 +303,16 @@ int main(int argc, char* argv[]) {
 		);
 
 		// 2nd attribute buffer : UVs
-		//glEnableVertexAttribArray(1);
-		//glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		//glVertexAttribPointer(
-		//	1,									// attribute. No particular reason for 1, but must match the layout in the shader.
-		//	2,									// size : U+V => 2
-		//	GL_FLOAT,					// type
-		//	GL_FALSE,					// normalized?
-		//	0,									// stride
-		//	(void*)0						// array buffer offset
-		//);
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glVertexAttribPointer(
+			1,									// attribute. No particular reason for 1, but must match the layout in the shader.
+			2,									// size : U+V => 2
+			GL_FLOAT,					// type
+			GL_FALSE,					// normalized?
+			0,									// stride
+			(void*)0						// array buffer offset
+		);
 
 		// 3rd attribute buffer : normals
 		glEnableVertexAttribArray(2);
@@ -323,7 +331,7 @@ int main(int argc, char* argv[]) {
 
 		glDrawElements(
 			GL_TRIANGLES,		// mode
-			objFaces.size(),			// count
+			faces.size(),			// count
 			GL_UNSIGNED_INT,	// type
 			(void*)0						// element array buffer offset
 		);
@@ -342,7 +350,7 @@ int main(int argc, char* argv[]) {
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
-	//glDeleteBuffers(1, &uvbuffer);
+	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteBuffers(1, &elementbuffer);
 	glDeleteProgram(programID);

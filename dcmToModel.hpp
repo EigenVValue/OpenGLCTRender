@@ -11,7 +11,7 @@ public:
 		const unsigned int &dimX,
 		const unsigned int &dimY,
 		const unsigned int &dimZ,
-		const float iso,
+		const uint8_t iso,
 		std::vector<glm::vec3> & objVertices,
 		std::vector<unsigned int> & objFaces,
 		std::vector<int> & colors,
@@ -24,7 +24,7 @@ public:
 		int32_t dimX;
 		int32_t dimY;
 		int32_t dimZ;
-		float iso;
+		uint8_t iso;
 		std::vector<uint8_t> data;
 	};
 

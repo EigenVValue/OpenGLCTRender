@@ -15,7 +15,7 @@ void dcmToModel::run(
 	const unsigned int &dimX,
 	const unsigned int &dimY,
 	const unsigned int &dimZ,
-	const float iso,
+	const uint8_t iso,
 	std::vector<glm::vec3> & objVertices,
 	std::vector<unsigned int> & objFaces,
 	std::vector<int> & colors,
@@ -77,10 +77,44 @@ void dcmToModel::run(
 	for (auto color : objColors)
 	{
 		// Hu = pixel * slope + intercept
-		int newColor = color * rescale_slope + ((float)rescale_intercept/4096.0f *255.0f);
+		// int newColor = color * rescale_slope + ((float)rescale_intercept/4096.0f *255.0f);
+		int newColor = color;
 		colors.push_back(newColor);
 	}
 
+	// Search
+	printf("%s", "start searching...\n");
+	int same = 0;
+	for (auto vertex1 : objVertices )
+	{
+		int num = 0;
+		for (auto vertex2 : objVertices)
+		{
+			if (vertex1.x == vertex2.x
+				&& vertex1.y == vertex2.y)
+			{
+				num++;
+			}
+			if (num > 10)
+			{
+				break;
+			}
+		}
+
+		if (num > 10)
+		{
+			same++;
+			printf("%f %f %f", vertex1.x, vertex1.y, vertex1.z);
+			printf("\n");
+		}
+		if (same >5)
+		{
+			break;
+		}
+	}
+
+	printf("%d", same);
+	printf("%s", "Search done");
 }
 
 void dcmToModel::computeSurface(
@@ -96,7 +130,7 @@ void dcmToModel::computeSurface(
 		volume.dimX,
 		volume.dimY,
 		volume.dimZ,
-		volume.iso * std::numeric_limits<uint8_t>::max(),
+		volume.iso,
 		vertices,
 		quads,
 		colors

@@ -48,37 +48,44 @@ void getUVs(
 	for (auto color : colors)
 	{
 		vec2 uv;
-		if (color >= -100 && color <= -20)
+		//if (color >= -100 && color <= -20)
+		if (color >= 10 && color <= 100)
 		{
-			uv = vec2(0.0f, 1.0f-0.0f);
+			uv = vec2(0.25f, 1.0f-0.25f);
 		}
-		else if (color == 0)
+		//else if (color == 0)
+		//else if (color >= 33 && color <= 64)
+		//{
+		//	uv = vec2(0.125f, 1.0f - 0.125f);
+		//}
+		//else if (color >=3 && color <= 10)
+		else if (color >= 101 && color <= 200)
 		{
-			uv = vec2(0.125f, 1.0f - 0.125f);
+			uv = vec2(0.75f, 1.0f - 0.25f);
 		}
-		else if (color >=3 && color <= 10)
+		//else if (color >= 11 && color <= 30)
+		//else if (color >= 97 && color <= 128)
+		//{
+		//	uv = vec2(0.375f, 1.0f - 0.375f);
+		//}
+		//else if (color >= 31 && color <= 50)
+		//else if (color >=201 && color <= 254)
+		//{
+		//	uv = vec2(0.5f, 1.0f - 0.5f);
+		//}
+		//else if (color >= 51 && color <= 70)
+		//else if (color >= 161 && color <= 192)
+		//{
+		//	uv = vec2(0.625f, 1.0f - 0.625f);
+		//}
+		//else if (color >= 400)
+		else if (color >= 201 && color <= 255)
 		{
-			uv = vec2(0.25f, 1.0f - 0.25f);
-		}
-		else if (color >= 11 && color <= 30)
-		{
-			uv = vec2(0.375f, 1.0f - 0.375f);
-		}
-		else if (color >= 31 && color <= 50)
-		{
-			uv = vec2(0.5f, 1.0f - 0.5f);
-		}
-		else if (color >= 51 && color <= 70)
-		{
-			uv = vec2(0.625f, 1.0f - 0.625f);
-		}
-		else if (color >= 400)
-		{
-			uv = vec2(0.75F, 1.0f - 0.75F);
+			uv = vec2(0.25f, 1.0f - 0.75f);
 		}
 		else
 		{
-			uv = vec2(0.875f, 1.0f - 0.875f);
+			uv = vec2(0.75f, 1.0f - 0.75f);
 		}
 		uvs.push_back(uv);
 	}
