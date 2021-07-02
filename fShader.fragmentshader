@@ -18,7 +18,7 @@ layout(location = 0) out vec3 color;
 uniform vec3 LightPosition_worldspace;
 uniform vec3 LightPosition_worldspace2;
 uniform vec3 LightPosition_worldspace3;
-uniform sampler2D myTextureSampler;
+uniform sampler2D textureSampler;
 
 vec3 calLight(vec3 LightDirection_cameraspace,
 	vec3 LightPosition_worldspace,
@@ -28,7 +28,7 @@ vec3 calLight(vec3 LightDirection_cameraspace,
 	vec3 LightColor = vec3(0.8,0.8,0.8);
 
 	// Material properties
-	vec3 MaterialDiffuseColor = texture( myTextureSampler, UV ).rgb;
+	vec3 MaterialDiffuseColor = texture( textureSampler, UV ).rgb;
 	vec3 MaterialSpecularColor = vec3(0.3,0.3,0.3);
 
 	// Use for simple light source attenuation

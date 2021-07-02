@@ -20,13 +20,13 @@ GLFWwindow* window;
 using namespace glm;
 
 // Include common
-#include <shader.hpp>
-#include <loadOBJ.hpp>
-//#include <controls.hpp>
-#include <controlsForFOV.hpp>
-#include <getNormals.hpp>
-#include <texture.hpp>
-#include <getUVs.hpp>
+#include "shader.hpp"
+//#include "loadOBJ.hpp"
+//#include "controls.hpp"
+#include "controlsForFOV.hpp"
+#include "getNormals.hpp"
+#include "texture.hpp"
+#include "getUVs.hpp"
 
 // Include dcmToModel
 #include "dependencies/include/converttobmp.h"
@@ -38,17 +38,21 @@ const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 const char* PATH // DCM path
 = "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
-const uint8_t ISO = 204;	// Threshold
+//= "D:\\VS\\Project\\DJ_medical\\CT_img\\CT-head\\CT-head\\LiZhanYou\\20200211153157\\1";
+//= "D:\\VS\\Project\\DJ_medical\\CT_img\\Wu Li Juan\\Wu Li Juan\\20180910092809.000\\3";
+const uint8_t ISO = 204;	// Isosurface
+const uint8_t THRESHOLD = 200;	// Threshold
 
 // Convert dcm files to obj model
 void dcmFileToModel(
 	const char* path,
 	const uint8_t iso,
+	const uint8_t threshold,
 	std::vector<glm::vec3> & objVertices,
 	std::vector<unsigned int> & objFaces,
 	std::vector<int> & colors
 ) {
-	// Set x, y, z and data
+	// Set x, y, z and raw data
 	unsigned int dimX = 0;
 	unsigned int dimY = 0;
 	unsigned int dimZ = 0;
@@ -67,6 +71,13 @@ void dcmFileToModel(
 		rescale_intercept,
 		rescale_slope
 	);
+	//removeNoise(
+	//	raw,
+	//	dimX,
+	//	dimY,
+	//	dimZ,
+	//	threshold
+	//);
 	printf("%s", "Get image done.\n");
 
 	// Convert raw file to obj model
@@ -117,7 +128,7 @@ int main(int argc, char* argv[]) {
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	// Hide the mouse and enable unlimited mouvement
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Set background color
 	glClearColor(0.467f, 0.467f, 0.467f, 0.0f);
@@ -143,7 +154,7 @@ int main(int argc, char* argv[]) {
 	std::vector<int> colors;
 
 	// Get vertex via loading raw file
-	dcmFileToModel(PATH, ISO, vertices, faces, colors);
+	dcmFileToModel(PATH, ISO, THRESHOLD, vertices, faces, colors);
 
 	// Load obj no need for now
 	/*
@@ -225,6 +236,12 @@ int main(int argc, char* argv[]) {
 	GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
 	GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
 
+	// Create and compile our GLSL program from the shaders
+	GLuint depthProgramID = LoadShaders("DepthRTT.vertexshader", "DepthRTT.fragmentshader");
+
+	// Get a handle for our "MVP" uniform
+	GLuint depthMatrixID = glGetUniformLocation(depthProgramID, "depthMVP");
+
 	// Load DDS
 	GLuint Texture;
 	{
@@ -235,8 +252,9 @@ int main(int argc, char* argv[]) {
 		Texture = loadBMP(path);
 	}
 
-	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
+	// Get a handle for our "textureSampler" uniform
+	GLuint TextureID = glGetUniformLocation(programID, "textureSampler");
+
 	printf("Start rendering\n");
 	end = clock();
 	printf("%f", (float)(end - start) / CLOCKS_PER_SEC);

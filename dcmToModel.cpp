@@ -82,39 +82,7 @@ void dcmToModel::run(
 		colors.push_back(newColor);
 	}
 
-	// Search
-	printf("%s", "start searching...\n");
-	int same = 0;
-	for (auto vertex1 : objVertices )
-	{
-		int num = 0;
-		for (auto vertex2 : objVertices)
-		{
-			if (vertex1.x == vertex2.x
-				&& vertex1.y == vertex2.y)
-			{
-				num++;
-			}
-			if (num > 10)
-			{
-				break;
-			}
-		}
-
-		if (num > 10)
-		{
-			same++;
-			printf("%f %f %f", vertex1.x, vertex1.y, vertex1.z);
-			printf("\n");
-		}
-		if (same >5)
-		{
-			break;
-		}
-	}
-
-	printf("%d", same);
-	printf("%s", "Search done");
+	
 }
 
 void dcmToModel::computeSurface(

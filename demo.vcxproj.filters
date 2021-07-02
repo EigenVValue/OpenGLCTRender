@@ -45,9 +45,6 @@
     <ClCompile Include="getUVs.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="sampleTexture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="getImageData.cpp">
       <Filter>DcmToModel</Filter>
     </ClCompile>
@@ -66,12 +63,6 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="DepthRTT.vertexshader">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="Passthrough.vertexshader">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="SimpleTexture.fragmentshader">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
@@ -109,10 +100,5 @@
     <ClInclude Include="dcmToModel.hpp">
       <Filter>DcmToModel</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="dual.txt">
-      <Filter>Source Files</Filter>
-    </Text>
   </ItemGroup>
 </Project>

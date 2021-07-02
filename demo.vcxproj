@@ -157,7 +157,6 @@
     <ClCompile Include="getNormals.cpp" />
     <ClCompile Include="getUVs.cpp" />
     <ClCompile Include="loadOBJ.cpp" />
-    <ClCompile Include="sampleTexture.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -166,8 +165,6 @@
     <None Include="DepthRTT.fragmentshader" />
     <None Include="DepthRTT.vertexshader" />
     <None Include="fShader.fragmentshader" />
-    <None Include="Passthrough.vertexshader" />
-    <None Include="SimpleTexture.fragmentshader" />
     <None Include="vShader.vertexshader" />
   </ItemGroup>
   <ItemGroup>
@@ -182,9 +179,6 @@
     <ClInclude Include="loadOBJ.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="texture.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="dual.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

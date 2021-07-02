@@ -54,5 +54,52 @@ void getImageData(
 			}
 		}
 	}
+}
 
+void removeNoise(
+	std::vector<uint8_t> &raw,
+	unsigned int &dimX,
+	unsigned int &dimY,
+	unsigned int &dimZ,
+	uint8_t threshold
+) {
+	for (int z = 0; z < dimZ; z++)
+	{
+		for (int y = 0; y < dimY; y++)
+		{
+			for (int x = 0; x < dimX; x++)
+			{
+				// If current grayscale is larger than threshold
+				// do search
+				if (raw[x + y * dimX + z * dimX * dimY]
+					>= threshold)
+				{
+					int zz = z;
+					int same = 0;
+					do
+					{
+						if (raw[x + y * dimX + zz * dimX * dimY]
+								>= threshold)
+						{
+							same++;
+							zz++;
+						}
+						else
+						{
+							break;
+						}
+					} while (zz < dimZ);
+
+					// Fixed number 0.1 * size of Z
+					if (same >= unsigned int(0.2*dimZ)) // 0.1 * dimZ
+					{
+						for (int i = 0; i < same; i++)
+						{
+							raw[x + y * dimX + (z+i) * dimX * dimY] = 0;
+						}
+					}
+				} // IF END
+			} // FOR X END
+		} // FOR Y END
+	} // FOR Z END
 }

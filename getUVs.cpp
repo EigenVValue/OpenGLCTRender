@@ -48,8 +48,8 @@ void getUVs(
 	for (auto color : colors)
 	{
 		vec2 uv;
-		//if (color >= -100 && color <= -20)
-		if (color >= 10 && color <= 100)
+		//if (color >= -100 && color <= -20)+
+		if (color >= 0 && color <= 100)
 		{
 			uv = vec2(0.25f, 1.0f-0.25f);
 		}
@@ -59,7 +59,7 @@ void getUVs(
 		//	uv = vec2(0.125f, 1.0f - 0.125f);
 		//}
 		//else if (color >=3 && color <= 10)
-		else if (color >= 101 && color <= 200)
+		else if (color >= 101 && color <= 240)
 		{
 			uv = vec2(0.75f, 1.0f - 0.25f);
 		}
@@ -79,7 +79,7 @@ void getUVs(
 		//	uv = vec2(0.625f, 1.0f - 0.625f);
 		//}
 		//else if (color >= 400)
-		else if (color >= 201 && color <= 255)
+		else if (color >= 241 && color <= 255)
 		{
 			uv = vec2(0.25f, 1.0f - 0.75f);
 		}

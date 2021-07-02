@@ -149,7 +149,7 @@ int32_t dualmc::getSharedDualPointIndex(
 			cy,
 			cz,
 			iso,
-			key.pointCode, // key.pointCode = getDualPointCode(cx, cy, cz, iso, edge);
+			key.pointCode,
 			vertices.back(),
 			colors.back()
 		);
