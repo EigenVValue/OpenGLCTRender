@@ -42,6 +42,11 @@ const char* PATH // DCM path
 //= "D:\\VS\\Project\\DJ_medical\\CT_img\\Wu Li Juan\\Wu Li Juan\\20180910092809.000\\3";
 const uint8_t ISO = 204;	// Isosurface
 const uint8_t THRESHOLD = 200;	// Threshold
+mat4 RotationMatrix = mat4(1);
+glm::vec4 position = glm::vec4(0, 0, -15,1);
+glm::vec4 up = glm::vec4(0, 2, -15,1);
+glm::mat4 rotX = glm::mat4(1);
+glm::mat4 rotY = glm::mat4(1);
 
 // Convert dcm files to obj model
 void dcmFileToModel(
@@ -268,14 +273,14 @@ int main(int argc, char* argv[]) {
 
 		// Build MVP Matrix
 		// ProjectionMatrix & ViewMatrix
-		computeMatricesFromInputs(WIDTH, HEIGHT);
+		computeMatricesFromInputs(WIDTH, HEIGHT, position, up,rotX,rotY);
 		mat4 ProjectionMatrix = getProjectionMatrix();
 		mat4 ViewMatrix = getViewMatrix();
 
 		// ModelMatrix
 		vec3 modelRotation = getModelRotation();
 		// Quaternion is better than Euler Angle
-		mat4 RotationMatrix = eulerAngleYXZ(modelRotation.y, modelRotation.x, modelRotation.z);
+		RotationMatrix =  eulerAngleYXZ(modelRotation.y, modelRotation.x, modelRotation.z) * RotationMatrix;
 		mat4 TranslationMatrix = translate(mat4(1.0f), getModelPosition());
 		mat4 ScalingMatrix = scale(mat4(1.0f), getModelScaling());
 		mat4 ModelMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;

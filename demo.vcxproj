@@ -157,6 +157,7 @@
     <ClCompile Include="getNormals.cpp" />
     <ClCompile Include="getUVs.cpp" />
     <ClCompile Include="loadOBJ.cpp" />
+    <ClCompile Include="quaternions.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="getNormals.hpp" />
     <ClInclude Include="getUVs.hpp" />
     <ClInclude Include="loadOBJ.hpp" />
+    <ClInclude Include="quaternions.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="texture.hpp" />
   </ItemGroup>

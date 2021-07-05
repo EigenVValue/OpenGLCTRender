@@ -1,7 +1,11 @@
 #ifndef CONTROLSFORFOV_HPP
 #define CONTROLSFORFOV_HPP
 
-void computeMatricesFromInputs(const int WIDTH, const int HEIGHT);
+void computeMatricesFromInputs(
+	const int WIDTH, const int HEIGHT,
+	glm::vec4 &position, glm::vec4 & up,
+	glm::mat4 &x, glm::mat4 &y
+);
 glm::mat4 getViewMatrix();
 glm::mat4 getProjectionMatrix();
 
