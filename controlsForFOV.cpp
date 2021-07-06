@@ -42,18 +42,31 @@ float initialFoV = 45.0f;
 
 float mouseSpeed = 0.005f;
 bool click = false;
+double offset = 0;
 
 double xpos, ypos;
 double currXpos, currYpos;
 
-
 void computeMatricesFromInputs(
 	const int WIDTH, const int HEIGHT,
-	glm::vec4 &position, glm::vec4 & up,
-	glm::mat4 &rotx, glm::mat4 &roty
+	glm::vec3 &position, glm::vec3 & up,
+	glm::vec3 &rotx, glm::vec3 &roty
 ) {
-	//glfwSetScrollCallback(window, scroll_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetMouseButtonCallback(window, mouse_callback);
+
+	// Scroll
+	{
+		// Change position
+		position.x *= 1 - offset * 0.05;
+		position.y *= 1 - offset * 0.05;
+		position.z *= 1 - offset * 0.05;
+		up.x *= 1 - offset * 0.05;
+		up.y *= 1 - offset * 0.05;
+		up.z *= 1 - offset * 0.05;
+		// Reset offset
+		offset = 0;
+	}
 
 	// Rotate
 	if (click) {
@@ -65,35 +78,40 @@ void computeMatricesFromInputs(
 		xpos = currXpos;
 		ypos = currYpos;
 
-		// Rotate model
+		// Rotate model, do what you like
+		/*
 		// Rotate at X-aixs
-		//modelRotation.x = verticalAngle;
+		modelRotation.x = verticalAngle;
 		// Rotate at Y-aixs
-		//modelRotation.y = horizontalAngle;
-
-		// Rotate postion, do what you like
+		modelRotation.y = horizontalAngle;
+		*/
 		
+		// Rotate postion
+		// Using Rodrigues' rotation formula:
+		//		v' = vcos(theta) + dot(u,v)u(1-cos(theta)) + cross(u,v)sin(theta)
+		// where v' is the vector we want, v is origin vector, u is a unit vector
 		// Rotate at Y-aixs
-		glm::mat4 rotationY = glm::mat4(1.0f);
-		rotationY[0][0] = glm::cos(horizontalAngle);
-		rotationY[0][2] = glm::sin(horizontalAngle);
-		rotationY[2][0] = -1 * glm::sin(horizontalAngle);
-		rotationY[2][2] = glm::cos(horizontalAngle);
-
-		position = rotx * roty *  rotationY * glm::transpose(roty) * glm::transpose(rotx) * position;
-		up = rotx * roty *  rotationY * glm::transpose(roty) * glm::transpose(rotx) * up;
-		rotx = rotationY * rotx;
-
+		position = position * cos(horizontalAngle) 
+			+ dot(roty, position) * roty * (1 - cos(horizontalAngle)) 
+			+ glm::cross(roty, position) * sin(horizontalAngle);
+		up = up * cos(horizontalAngle)
+			+ dot(roty, up) * roty * (1 - cos(horizontalAngle))
+			+ glm::cross(roty, up) * sin(horizontalAngle);
+		rotx = rotx * cos(horizontalAngle)
+			+ dot(roty, rotx) * roty * (1 - cos(horizontalAngle))
+			+ glm::cross(roty, rotx) * sin(horizontalAngle);
+		rotx = glm::normalize(rotx);
 		// Rotate at X-aixs
-		glm::mat4 rotationX = glm::mat4(1.0f);
-		rotationX[1][1] = glm::cos(verticalAngle);
-		rotationX[1][2] = -1 * glm::sin(verticalAngle);
-		rotationX[2][1] = glm::sin(verticalAngle);
-		rotationX[2][2] = glm::cos(verticalAngle);
-
-		position = roty * rotx * rotationX * glm::transpose(rotx) * glm::transpose(roty) * position;
-		up = roty * rotx * rotationX * glm::transpose(rotx) * glm::transpose(roty) * up;
-		roty = rotationX * roty;
+		position = position * cos(verticalAngle)
+			+ dot(rotx, position) * rotx * (1 - cos(verticalAngle))
+			+ glm::cross(rotx, position) * sin(verticalAngle);
+		up = up * cos(verticalAngle)
+			+ dot(rotx, up) * rotx * (1 - cos(verticalAngle))
+			+ glm::cross(rotx, up) * sin(verticalAngle);
+		roty = roty * cos(verticalAngle)
+			+ dot(rotx, roty) * rotx * (1 - cos(verticalAngle))
+			+ glm::cross(rotx, roty) * sin(verticalAngle);
+		roty = glm::normalize(roty);
 	}
 
 	// Projection matrix : 45?Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
@@ -117,9 +135,6 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
 		ypos = NULL;
 	}
 }
-//void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-//	// Scale the coordinate of position
-//	position.x *= 1 - yoffset * 0.05;
-//	position.y *= 1 - yoffset * 0.05;
-//	position.z *= 1 - yoffset * 0.05;
-//}
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+	offset = yoffset;
+}

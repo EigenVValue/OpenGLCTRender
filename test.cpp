@@ -37,16 +37,18 @@ using namespace glm;
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 const char* PATH // DCM path
-= "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
+//= "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
 //= "D:\\VS\\Project\\DJ_medical\\CT_img\\CT-head\\CT-head\\LiZhanYou\\20200211153157\\1";
-//= "D:\\VS\\Project\\DJ_medical\\CT_img\\Wu Li Juan\\Wu Li Juan\\20180910092809.000\\3";
+= "D:\\VS\\Project\\DJ_medical\\CT_img\\Wu Li Juan\\Wu Li Juan\\20180910092809.000\\3";
 const uint8_t ISO = 204;	// Isosurface
 const uint8_t THRESHOLD = 200;	// Threshold
+
+// MVP variables
 mat4 RotationMatrix = mat4(1);
-glm::vec4 position = glm::vec4(0, 0, -15,1);
-glm::vec4 up = glm::vec4(0, 2, -15,1);
-glm::mat4 rotX = glm::mat4(1);
-glm::mat4 rotY = glm::mat4(1);
+glm::vec3 position = glm::vec3(0, 0, -15);
+glm::vec3 up = glm::vec3(0, 2, -15);
+glm::vec3 rotX = glm::vec3(1,0,0);
+glm::vec3 rotY = glm::vec3(0,1,0);
 
 // Convert dcm files to obj model
 void dcmFileToModel(
@@ -76,13 +78,13 @@ void dcmFileToModel(
 		rescale_intercept,
 		rescale_slope
 	);
-	//removeNoise(
-	//	raw,
-	//	dimX,
-	//	dimY,
-	//	dimZ,
-	//	threshold
-	//);
+	removeNoise(
+		raw,
+		dimX,
+		dimY,
+		dimZ,
+		threshold
+	);
 	printf("%s", "Get image done.\n");
 
 	// Convert raw file to obj model
@@ -179,8 +181,9 @@ int main(int argc, char* argv[]) {
 	}*/
 	// Get vertex
 	//objVerticesToGLVertices(vertices, objVertices, objFaces);
+
+	// Get pivot (Need change)
 	{
-		// Get pivot Need change
 		float pivot[3] = { 0.0f };
 		for (auto & vertex : vertices) {
 			// Add up
@@ -264,7 +267,6 @@ int main(int argc, char* argv[]) {
 	end = clock();
 	printf("%f", (float)(end - start) / CLOCKS_PER_SEC);
 	do {
-
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -305,7 +307,6 @@ int main(int argc, char* argv[]) {
 		glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
 		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
 		
-
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, Texture);

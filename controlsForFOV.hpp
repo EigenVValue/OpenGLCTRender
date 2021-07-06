@@ -3,8 +3,8 @@
 
 void computeMatricesFromInputs(
 	const int WIDTH, const int HEIGHT,
-	glm::vec4 &position, glm::vec4 & up,
-	glm::mat4 &x, glm::mat4 &y
+	glm::vec3 &position, glm::vec3 & up,
+	glm::vec3 &x, glm::vec3 &y
 );
 glm::mat4 getViewMatrix();
 glm::mat4 getProjectionMatrix();
