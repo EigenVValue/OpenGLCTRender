@@ -97,14 +97,14 @@
     <ClInclude Include="dualmc.hpp">
       <Filter>DcmToModel</Filter>
     </ClInclude>
-    <ClInclude Include="getImageData.h">
-      <Filter>DcmToModel</Filter>
-    </ClInclude>
     <ClInclude Include="dcmToModel.hpp">
       <Filter>DcmToModel</Filter>
     </ClInclude>
     <ClInclude Include="quaternions.hpp">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="getImageData.hpp">
+      <Filter>DcmToModel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

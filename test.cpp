@@ -30,18 +30,18 @@ using namespace glm;
 
 // Include dcmToModel
 #include "dependencies/include/converttobmp.h"
-#include "getImageData.h"
+#include "getImageData.hpp"
 #include "dcmToModel.hpp"
 
 // Set window width and height
 const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 const char* PATH // DCM path
-//= "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
+= "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
 //= "D:\\VS\\Project\\DJ_medical\\CT_img\\CT-head\\CT-head\\LiZhanYou\\20200211153157\\1";
-= "D:\\VS\\Project\\DJ_medical\\CT_img\\Wu Li Juan\\Wu Li Juan\\20180910092809.000\\3";
+//= "D:\\VS\\Project\\DJ_medical\\CT_img\\Wu Li Juan\\Wu Li Juan\\20180910092809.000\\3";
 const uint8_t ISO = 204;	// Isosurface
-const uint8_t THRESHOLD = 200;	// Threshold
+const uint8_t THRESHOLD = 225;	// Threshold
 
 // MVP variables
 mat4 RotationMatrix = mat4(1);

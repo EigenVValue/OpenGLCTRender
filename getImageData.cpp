@@ -1,6 +1,8 @@
 #include <Windows.h>
 #include <vector>
 
+#include "getImageData.hpp"
+
 // Inclued WANLI's file
 #include "dependencies/include/converttobmp.h"
 
@@ -54,6 +56,8 @@ void getImageData(
 			}
 		}
 	}
+
+	delete data.buffer;
 }
 
 void removeNoise(
@@ -91,7 +95,7 @@ void removeNoise(
 					} while (zz < dimZ);
 
 					// Fixed number 0.1 * size of Z
-					if (same >= unsigned int(0.2*dimZ)) // 0.1 * dimZ
+					if (same >= unsigned int(0.3*dimZ)) // 0.1 * dimZ
 					{
 						for (int i = 0; i < same; i++)
 						{

@@ -21,17 +21,17 @@ GLFWwindow* window;
 using namespace glm;
 
 // Include common
-#include <shader.hpp>
-#include <loadOBJ.hpp>
-//#include <controls.hpp>
-#include <controlsForFOV.hpp>
-#include <getNormals.hpp>
-#include <texture.hpp>
-#include <getUVs.hpp>
+#include "shader.hpp"
+//#include "loadOBJ.hpp"
+//#include "controls.hpp"
+#include "controlsForFOV.hpp"
+#include "getNormals.hpp"
+#include "texture.hpp"
+#include "getUVs.hpp"
 
 // Include dcmToModel
 #include "dependencies/include/converttobmp.h"
-#include "getImageData.h"
+#include "getImageData.hpp"
 #include "dcmToModel.hpp"
 
 // Set window width and height
@@ -39,17 +39,28 @@ const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 const char* PATH // DCM path
 = "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
-const uint8_t ISO = 204;	// Threshold
+//= "D:\\VS\\Project\\DJ_medical\\CT_img\\CT-head\\CT-head\\LiZhanYou\\20200211153157\\1";
+//= "D:\\VS\\Project\\DJ_medical\\CT_img\\Wu Li Juan\\Wu Li Juan\\20180910092809.000\\3";
+const uint8_t ISO = 204;	// Isosurface
+const uint8_t THRESHOLD = 225;	// Threshold
+
+// MVP variables
+mat4 RotationMatrix = mat4(1);
+glm::vec3 position = glm::vec3(0, 0, -15);
+glm::vec3 up = glm::vec3(0, 2, -15);
+glm::vec3 rotX = glm::vec3(1,0,0);
+glm::vec3 rotY = glm::vec3(0,1,0);
 
 // Convert dcm files to obj model
 void dcmFileToModel(
 	const char* path,
 	const uint8_t iso,
+	const uint8_t threshold,
 	std::vector<glm::vec3> & objVertices,
 	std::vector<unsigned int> & objFaces,
 	std::vector<int> & colors
 ) {
-	// Set x, y, z and data
+	// Set x, y, z and raw data
 	unsigned int dimX = 0;
 	unsigned int dimY = 0;
 	unsigned int dimZ = 0;
@@ -67,6 +78,13 @@ void dcmFileToModel(
 		dimZ,
 		rescale_intercept,
 		rescale_slope
+	);
+	removeNoise(
+		raw,
+		dimX,
+		dimY,
+		dimZ,
+		threshold
 	);
 	printf("%s", "Get image done.\n");
 
@@ -118,7 +136,7 @@ int main(int argc, char* argv[]) {
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	// Hide the mouse and enable unlimited mouvement
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Set background color
 	glClearColor(0.467f, 0.467f, 0.467f, 0.0f);
@@ -144,7 +162,7 @@ int main(int argc, char* argv[]) {
 	std::vector<int> colors;
 
 	// Get vertex via loading raw file
-	dcmFileToModel(PATH, ISO, vertices, faces, colors);
+	dcmFileToModel(PATH, ISO, THRESHOLD, vertices, faces, colors);
 
 	// Load obj no need for now
 	/*
@@ -162,11 +180,11 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 	}
-
 	// Get vertex
 	//objVerticesToGLVertices(vertices, objVertices, objFaces);
+
+	// Get pivot (Need change)
 	{
-	// Get pivot Need change
 	float pivot[3] = { 0.0f };
 	for (auto & vertex : vertices) {
 		// Add up
@@ -227,6 +245,12 @@ int main(int argc, char* argv[]) {
 	GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
 	GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
 
+	// Create and compile our GLSL program from the shaders
+	GLuint depthProgramID = LoadShaders("DepthRTT.vertexshader", "DepthRTT.fragmentshader");
+
+	// Get a handle for our "MVP" uniform
+	GLuint depthMatrixID = glGetUniformLocation(depthProgramID, "depthMVP");
+
 	// Load DDS
 	GLuint Texture;
 	{
@@ -237,13 +261,13 @@ int main(int argc, char* argv[]) {
 		Texture = loadBMP(path);
 	}
 
-	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
+	// Get a handle for our "textureSampler" uniform
+	GLuint TextureID = glGetUniformLocation(programID, "textureSampler");
+
 	printf("Start rendering\n");
 	end = clock();
 	printf("%f", (float)(end - start) / CLOCKS_PER_SEC);
 	do {
-
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -252,14 +276,14 @@ int main(int argc, char* argv[]) {
 
 		// Build MVP Matrix
 		// ProjectionMatrix & ViewMatrix
-		computeMatricesFromInputs(WIDTH, HEIGHT);
+		computeMatricesFromInputs(WIDTH, HEIGHT, position, up, rotX, rotY);
 		mat4 ProjectionMatrix = getProjectionMatrix();
 		mat4 ViewMatrix = getViewMatrix();
 
 		// ModelMatrix
 		vec3 modelRotation = getModelRotation();
 		// Quaternion is better than Euler Angle
-		mat4 RotationMatrix = eulerAngleYXZ(modelRotation.y, modelRotation.x, modelRotation.z);
+		RotationMatrix = eulerAngleYXZ(modelRotation.y, modelRotation.x, modelRotation.z) * RotationMatrix;
 		mat4 TranslationMatrix = translate(mat4(1.0f), getModelPosition());
 		mat4 ScalingMatrix = scale(mat4(1.0f), getModelScaling());
 		mat4 ModelMatrix = TranslationMatrix * RotationMatrix * ScalingMatrix;

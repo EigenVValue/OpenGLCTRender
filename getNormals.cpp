@@ -44,6 +44,8 @@ std::vector<glm::vec3> getVertexNormals(
 		normals.push_back(normal);
 	}
 
+	delete faceArr;
+
 	return normals;
 }
 

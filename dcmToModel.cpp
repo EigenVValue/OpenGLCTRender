@@ -81,8 +81,6 @@ void dcmToModel::run(
 		int newColor = color;
 		colors.push_back(newColor);
 	}
-
-	
 }
 
 void dcmToModel::computeSurface(
