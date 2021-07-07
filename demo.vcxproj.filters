@@ -51,9 +51,6 @@
     <ClCompile Include="dcmToModel.cpp">
       <Filter>DcmToModel</Filter>
     </ClCompile>
-    <ClCompile Include="quaternions.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fShader.fragmentshader">
@@ -66,6 +63,12 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="DepthRTT.vertexshader">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="Passthrough.vertexshader">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="SimpleTexture.fragmentshader">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
@@ -99,9 +102,6 @@
     </ClInclude>
     <ClInclude Include="dcmToModel.hpp">
       <Filter>DcmToModel</Filter>
-    </ClInclude>
-    <ClInclude Include="quaternions.hpp">
-      <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="getImageData.hpp">
       <Filter>DcmToModel</Filter>

@@ -2,7 +2,6 @@
 #define DCMTOMODEL_H_INCLUDED
 
 #include "dualmc.h"
-#include "dependencies/include/glm/glm.hpp"
 
 class dcmToModel {
 public:

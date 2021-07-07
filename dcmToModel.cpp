@@ -6,7 +6,7 @@
 #include "dualmc.hpp"
 
 // GLM
-#include "dependencies/include/glm/glm.hpp"
+#include "glm/glm.hpp"
 
 #include "dcmToModel.hpp"
 

@@ -4,7 +4,7 @@
 #include "getImageData.hpp"
 
 // Inclued WANLI's file
-#include "dependencies/include/converttobmp.h"
+#include "converttobmp.h"
 
 void getImageData(
 		const char* path, 
