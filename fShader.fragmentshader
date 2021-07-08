@@ -2,12 +2,11 @@
 
 // Interpolated values from the vertex shaders
 in vec2 UV;
-in vec4 ShadowCoord;
-
 in vec3 Position_worldspace;
 in vec3 Normal_cameraspace;
 in vec3 EyeDirection_cameraspace;
 in vec3 LightDirection_cameraspace;
+in vec4 ShadowCoord;
 //in vec3 LightDirection_cameraspace2;
 //in vec3 LightDirection_cameraspace3;
 
@@ -47,7 +46,8 @@ float random(vec3 seed, int i){
 	return fract(sin(dot_product) * 43758.5453);
 }
 
-vec3 calLight(vec3 LightDirection_cameraspace,
+vec3 calLight(
+	vec3 LightDirection_cameraspace,
 	vec3 LightPosition_worldspace,
 	float LightPower) 
 {
@@ -89,43 +89,41 @@ vec3 calLight(vec3 LightDirection_cameraspace,
 	// Specular : ks * Ls * (v.r)^n * att
 	//vec3 specular = MaterialSpecularColor * (LightColor) * pow(cosAlpha,10) / (distance*distance);
 	
-	//
-	float visibility=1.0;
+	float visibility=0.3;
 
-	// Fixed bias, or...
-	float bias = 0.005;
-
-	// ...variable bias
-	// float bias = 0.005*tan(acos(cosTheta));
-	// bias = clamp(bias, 0,0.01);
+	// variable bias
+	float bias = 0.005*tan(acos(cosTheta));
+	bias = clamp(bias, 0,0.01);
 
 	// Sample the shadow map 4 times
-	for (int i=0;i<4;i++){
+	//for (int i = 0 ;i < 4; i++) {
 		// use either :
 		//  - Always the same samples.
 		//    Gives a fixed pattern in the shadow, but no noise
-		int index = i;
-		//  - A random sample, based on the pixel's screen location. 
-		//    No banding, but the shadow moves with the camera, which looks weird.
-		// int index = int(16.0*random(gl_FragCoord.xyy, i))%16;
+		//int index = i;
 		//  - A random sample, based on the pixel's position in world space.
 		//    The position is rounded to the millimeter to avoid too much aliasing
-		// int index = int(16.0*random(floor(Position_worldspace.xyz*1000.0), i))%16;
+		//int index = int(16.0*random(floor(Position_worldspace.xyz*1000.0), i))%16;
 		
 		// being fully in the shadow will eat up 4*0.2 = 0.8
 		// 0.2 potentially remain, which is quite dark.
-		visibility -= 0.2*(1.0-texture( shadowMap, vec3(ShadowCoord.xy + poissonDisk[index]/700.0,  (ShadowCoord.z-bias)/ShadowCoord.w) ));
+		//visibility -= 0.2 * (1.0 - texture(shadowMap,vec3(ShadowCoord.xy + poissonDisk[index]/700.0, (ShadowCoord.z-bias)/ShadowCoord.w)));
+	//}
+
+	if ( texture( shadowMap, vec3(ShadowCoord.xy, (ShadowCoord.z)/ShadowCoord.w) ) == 1.0) {
+		visibility = 1.0;
 	}
-	// For spot lights, use either one of these lines instead.
-	// if ( texture( shadowMap, (ShadowCoord.xy/ShadowCoord.w) ).z  <  (ShadowCoord.z-bias)/ShadowCoord.w )
-	// if ( textureProj( shadowMap, ShadowCoord.xyw ).z  <  (ShadowCoord.z-bias)/ShadowCoord.w )
-	//
+
+	//visibility = texture( shadowMap, vec3(ShadowCoord.xy, (ShadowCoord.z)/ShadowCoord.w) );
 
 	// Diffuse : kd * Ld * (n.l) * atten
-	vec3 diffuse = visibility * MaterialDiffuseColor * LightColor * LightPower * cosTheta;
+	vec3 diffuse = visibility * MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance);
 
 	// Specular : ks * Ls * (v.r)^n * att
-	vec3 specular = visibility * MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5);
+	vec3 specular = visibility * MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance);
+
+	//vec3 diffuse = MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance);
+	//vec3 specular = MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,10) / (distance*distance);
 
 	return diffuse + specular;
 }

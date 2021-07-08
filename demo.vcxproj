@@ -165,8 +165,6 @@
     <None Include="DepthRTT.fragmentshader" />
     <None Include="DepthRTT.vertexshader" />
     <None Include="fShader.fragmentshader" />
-    <None Include="Passthrough.vertexshader" />
-    <None Include="SimpleTexture.fragmentshader" />
     <None Include="vShader.vertexshader" />
   </ItemGroup>
   <ItemGroup>

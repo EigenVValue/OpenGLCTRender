@@ -24,7 +24,7 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
-	// Vertex Shader
+	// Read the Vertex Shader code from the file
 	std::string VertexShaderCode;
 	std::ifstream VertexShaderStream(vertex_file_path, std::ios::in);
 	if (VertexShaderStream.is_open()) {
@@ -34,12 +34,12 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 		VertexShaderStream.close();
 	}
 	else {
-		printf("Impossible to open %s. Are you in the right directory ? \n", vertex_file_path);
+		printf("Impossible to open %s. Are you in the right directory ?\n", vertex_file_path);
 		getchar();
 		return 0;
 	}
 
-	// Fragment Shader
+	// Read the Fragment Shader code from the file
 	std::string FragmentShaderCode;
 	std::ifstream FragmentShaderStream(fragment_file_path, std::ios::in);
 	if (FragmentShaderStream.is_open()) {
@@ -51,6 +51,7 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
+
 
 	// Compile Vertex Shader
 	printf("Compiling shader : %s\n", vertex_file_path);
@@ -67,6 +68,7 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 		printf("%s\n", &VertexShaderErrorMessage[0]);
 	}
 
+
 	// Compile Fragment Shader
 	printf("Compiling shader : %s\n", fragment_file_path);
 	char const * FragmentSourcePointer = FragmentShaderCode.c_str();
@@ -81,6 +83,8 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 		glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
 		printf("%s\n", &FragmentShaderErrorMessage[0]);
 	}
+
+
 
 	// Link the program
 	printf("Linking program\n");
@@ -97,6 +101,7 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
 		printf("%s\n", &ProgramErrorMessage[0]);
 	}
+
 
 	glDetachShader(ProgramID, VertexShaderID);
 	glDetachShader(ProgramID, FragmentShaderID);

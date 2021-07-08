@@ -65,12 +65,6 @@
     <None Include="DepthRTT.vertexshader">
       <Filter>shaders</Filter>
     </None>
-    <None Include="Passthrough.vertexshader">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="SimpleTexture.fragmentshader">
-      <Filter>shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.hpp">

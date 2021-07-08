@@ -1,5 +1,4 @@
-  
-#version 330 core
+ #version 330 core
 
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 vertexPosition_modelspace;
@@ -25,7 +24,6 @@ uniform mat4 DepthBiasMVP;
 uniform vec3 LightPosition_worldspace;
 //uniform vec3 LightPosition_worldspace2;
 //uniform vec3 LightPosition_worldspace3;
-uniform mat4 DepthBiasMVP;
 
 void main(){	
 	// Output position of the vertex, in clip space : MVP * position
@@ -40,7 +38,7 @@ void main(){
 	EyeDirection_cameraspace = vec3(0,0,0) - vertexPosition_cameraspace;
 
 	// Vector that goes from the vertex to the light, in camera space. M is ommited because it's identity.
-	vec3 LightPosition_cameraspace = ( V * vec4(LightPosition_worldspace,1)).xyz;
+	vec3 LightPosition_cameraspace = ( V * vec4(LightPosition_worldspace,0)).xyz;
 	LightDirection_cameraspace = LightPosition_cameraspace + EyeDirection_cameraspace;
 
 	//vec3 LightPosition_cameraspace2 = ( V * vec4(LightPosition_worldspace2,1)).xyz;
