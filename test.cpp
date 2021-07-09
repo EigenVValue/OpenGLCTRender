@@ -38,7 +38,7 @@ const GLuint  WIDTH = 1024;
 const GLuint  HEIGHT = 768;
 const char* PATH // DCM path
 = "D:\\VS\\Project\\DJ_medical\\CT_img\\Recon_4";
-//= "D:\\VS\\Project\\DJ_medical\\CT_img\\CT-head\\CT-head\\LiZhanYou\\20200211153157\\1";
+//= "D:\\VS\\Project\\DJ_medical\\CT_img\\CT-head\\CT-head\\LiZhanYou\\20200211153157\\1"; // error
 //= "D:\\VS\\Project\\DJ_medical\\CT_img\\Wu Li Juan\\Wu Li Juan\\20180910092809.000\\3";
 const uint8_t ISO = 204;	// Isosurface
 const uint8_t THRESHOLD = 225;	// Threshold
@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 	// Shade model
-	glShadeModel(GL_SMOOTH);
+	//glShadeModel(GL_SMOOTH);
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -156,6 +156,16 @@ int main(int argc, char* argv[]) {
 
 	// Get a handle for our "MVP" uniform
 	GLuint depthMatrixID = glGetUniformLocation(depthProgramID, "depthMVP");
+
+	// Load the texture
+	GLuint Texture;
+	{
+		std::filesystem::path currPath = argv[0];
+		currPath = currPath.parent_path();
+		currPath += "\\img\\Texture2.bmp";
+		char* path = currPath.string().data();
+		Texture = loadBMP(path);
+	}
 
 	// Set vertex, color and normal
 	std::vector<glm::vec3> vertices;
@@ -236,10 +246,9 @@ int main(int argc, char* argv[]) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size() * sizeof(unsigned int), &faces[0], GL_STATIC_DRAW);
 
 
-	// ---------------------------------------------
-	// Render to Texture - specific code begins here
-	// ---------------------------------------------
-
+	// ----------------------------
+	// Render to Texture
+	// ----------------------------
 	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 	GLuint FramebufferName = 0;
 	glGenFramebuffers(1, &FramebufferName);
@@ -270,18 +279,6 @@ int main(int argc, char* argv[]) {
 	// Create and compile GLSL program from the shaders
 	GLuint programID = LoadShaders("vShader.vertexshader", "fShader.fragmentshader");
 
-	// Load DDS
-	GLuint Texture;
-	{
-		std::filesystem::path currPath = argv[0];
-		currPath = currPath.parent_path();
-		currPath += "\\img\\Texture2.bmp";
-		char* path = currPath.string().data();
-		Texture = loadBMP(path);
-	}
-	// Load the texture
-	//Texture = loadDDS("img\\uvmap.DDS");
-
 	// Get a handle for our "textureSampler" uniform
 	GLuint TextureID = glGetUniformLocation(programID, "textureSampler");
 
@@ -299,12 +296,15 @@ int main(int argc, char* argv[]) {
 
 	printf("Start rendering\n");
 	end = clock();
-	printf("%f", (float)(end - start) / CLOCKS_PER_SEC);
+	printf("%f\n", (float)(end - start) / CLOCKS_PER_SEC);
 
 	// Start rendering
 	do {
+
+		// ----------------------------
+		// First light
+		// ----------------------------
 		// Render to our framebuffer
-		
 		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
 		glViewport(0, 0, 1024, 1024); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
@@ -325,16 +325,13 @@ int main(int argc, char* argv[]) {
 		float sideZ = -11.0f;
 		float sideX = sideZ * sqrt(3.0f);
 		glm::vec3 lightPos = vec3(sideX, 0.0f, sideZ);
-		glm::vec3 lightPos2 = vec3(-sideX, 0.0f, sideZ);
+		//glm::vec3 lightPos2 = vec3(-sideX, 0.0f, sideZ);
 		// Back light
-		glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
-
+		//glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
 		glm::mat4 depthProjectionMatrix = glm::ortho<float>(-20, 20, -20, 20, -20, 20);
 		glm::mat4 depthViewMatrix = glm::lookAt(lightPos, glm::vec3(0, 0, 0), glm::vec3(0,1,0));
-
-		glm::mat4 depthModelMatrix = glm::mat4(1.0);
+		glm::mat4 depthModelMatrix = glm::mat4(1.0f);
 		glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
@@ -343,12 +340,12 @@ int main(int argc, char* argv[]) {
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 		glVertexAttribPointer(
-			0,  // The attribute we want to configure
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
+			0,								 // The attribute we want to configure
+			3,								 // size
+			GL_FLOAT,			     // type
+			GL_FALSE,			     // normalized?
+			0,							     // stride
+			(void*)0				     // array buffer offset
 		);
 
 		// Index buffer
@@ -358,17 +355,23 @@ int main(int argc, char* argv[]) {
 		glDrawElements(
 			GL_TRIANGLES,      // mode
 			faces.size(),    // count
-			GL_UNSIGNED_SHORT, // type
+			GL_UNSIGNED_INT, // type
 			(void*)0           // element array buffer offset
 		);
 
 		glDisableVertexAttribArray(0);
 
+		// ----------------------------
+		// Second light
+		// ----------------------------
 
+		// ----------------------------
+		// Third light (back light)
+		// ----------------------------
 
-		
-
+		// ----------------------------
 		// Render to the screen
+		// ----------------------------
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, WIDTH, HEIGHT); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
@@ -411,15 +414,6 @@ int main(int argc, char* argv[]) {
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 		glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &depthBiasMVP[0][0]);
-		//
-		//
-		//
-		//visibility
-		//
-		//
-		//
-		//
-
 
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 		//glUniform3f(LightID2, lightPos2.x, lightPos2.y, lightPos2.z);

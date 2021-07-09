@@ -86,13 +86,11 @@ GLuint loadBMP(const char * imagepath) {
 }
 
 // DDS part
-// No need for now
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // Equivalent to "DXT5" in ASCII
 
 GLuint loadDDS(const char * imagepath) {
-	printf("Loading DDS file %s...\n", imagepath);
 
 	unsigned char header[124];
 
@@ -101,7 +99,7 @@ GLuint loadDDS(const char * imagepath) {
 	/* try to open the file */
 	fp = fopen(imagepath, "rb");
 	if (fp == NULL) {
-		printf("%s could not be opened. Are you in the right directory ?\n", imagepath); getchar();
+		printf("%s could not be opened. Are you in the right directory ? Don't forget to read the FAQ !\n", imagepath); getchar();
 		return 0;
 	}
 
@@ -180,8 +178,6 @@ GLuint loadDDS(const char * imagepath) {
 
 	free(buffer);
 
-
-	printf("End Loading...\n");
 	return textureID;
 
 
