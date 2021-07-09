@@ -153,9 +153,13 @@ int main(int argc, char* argv[]) {
 
 	// Create and compile our GLSL program from the shaders
 	GLuint depthProgramID = LoadShaders("DepthRTT.vertexshader", "DepthRTT.fragmentshader");
+	GLuint depthProgramID2 = LoadShaders("DepthRTT.vertexshader", "DepthRTT.fragmentshader");
+	GLuint depthProgramID3 = LoadShaders("DepthRTT.vertexshader", "DepthRTT.fragmentshader");
 
 	// Get a handle for our "MVP" uniform
 	GLuint depthMatrixID = glGetUniformLocation(depthProgramID, "depthMVP");
+	GLuint depthMatrixID2 = glGetUniformLocation(depthProgramID2, "depthMVP");
+	GLuint depthMatrixID3 = glGetUniformLocation(depthProgramID3, "depthMVP");
 
 	// Load the texture
 	GLuint Texture;
@@ -245,7 +249,6 @@ int main(int argc, char* argv[]) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size() * sizeof(unsigned int), &faces[0], GL_STATIC_DRAW);
 
-
 	// ----------------------------
 	// Render to Texture
 	// ----------------------------
@@ -253,21 +256,62 @@ int main(int argc, char* argv[]) {
 	GLuint FramebufferName = 0;
 	glGenFramebuffers(1, &FramebufferName);
 	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-
 	// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
 	GLuint depthTexture;
-	glGenTextures(1, &depthTexture);
-	glBindTexture(GL_TEXTURE_2D, depthTexture);
+	{
+		glGenTextures(1, &depthTexture);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+	}
+
+	GLuint FramebufferName2 = 0;
+	glGenFramebuffers(1, &FramebufferName2);
+	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName2);
+	GLuint depthTexture2;
+	{
+		glGenTextures(1, &depthTexture2);
+		glBindTexture(GL_TEXTURE_2D, depthTexture2);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture2, 0);
+	}
+
+
+	GLuint FramebufferName3 = 0;
+	glGenFramebuffers(1, &FramebufferName3);
+	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName3);
+	GLuint depthTexture3;
+	{
+		glGenTextures(1, &depthTexture3);
+		glBindTexture(GL_TEXTURE_2D, depthTexture3);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture3, 0);
+	}
+
 
 	// No color output in the bound framebuffer, only depth.
 	glDrawBuffer(GL_NONE);
@@ -286,13 +330,19 @@ int main(int argc, char* argv[]) {
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
 	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
+
+	// Shadow map uniform
 	GLuint DepthBiasID = glGetUniformLocation(programID, "DepthBiasMVP");
 	GLuint ShadowMapID = glGetUniformLocation(programID, "shadowMap");
+	GLuint DepthBiasID2 = glGetUniformLocation(programID, "DepthBiasMVP2");
+	GLuint ShadowMapID2 = glGetUniformLocation(programID, "shadowMap2");
+	GLuint DepthBiasID3 = glGetUniformLocation(programID, "DepthBiasMVP3");
+	GLuint ShadowMapID3 = glGetUniformLocation(programID, "shadowMap3");
 
 	// Get a handle for "LightPosition" uniform
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
-	//GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
-	//GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
+	GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
+	GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
 
 	printf("Start rendering\n");
 	end = clock();
@@ -300,11 +350,19 @@ int main(int argc, char* argv[]) {
 
 	// Start rendering
 	do {
+		// Set light postion for 3 three buffer render
+		// Side light
+		float sideZ = -11.0f;
+		float sideX = sideZ * sqrt(3.0f);
+		glm::vec3 lightPos = vec3(sideX, 0.0f, sideZ);
+		glm::vec3 lightPos2 = vec3(-sideX, 0.0f, sideZ);
+		// Back light
+		glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
 
+		// Render to our framebuffer
 		// ----------------------------
 		// First light
 		// ----------------------------
-		// Render to our framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
 		glViewport(0, 0, 1024, 1024); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
@@ -320,14 +378,6 @@ int main(int argc, char* argv[]) {
 		// Use our shader
 		glUseProgram(depthProgramID);
 
-		// Set light postion
-		// Side light
-		float sideZ = -11.0f;
-		float sideX = sideZ * sqrt(3.0f);
-		glm::vec3 lightPos = vec3(sideX, 0.0f, sideZ);
-		//glm::vec3 lightPos2 = vec3(-sideX, 0.0f, sideZ);
-		// Back light
-		//glm::vec3 lightPos3 = vec3(0.0f, 3.0f, 15.0f);
 		glm::mat4 depthProjectionMatrix = glm::ortho<float>(-20, 20, -20, 20, -20, 20);
 		glm::mat4 depthViewMatrix = glm::lookAt(lightPos, glm::vec3(0, 0, 0), glm::vec3(0,1,0));
 		glm::mat4 depthModelMatrix = glm::mat4(1.0f);
@@ -353,30 +403,109 @@ int main(int argc, char* argv[]) {
 
 		// Draw the triangles !
 		glDrawElements(
-			GL_TRIANGLES,      // mode
-			faces.size(),    // count
-			GL_UNSIGNED_INT, // type
-			(void*)0           // element array buffer offset
+			GL_TRIANGLES,		// mode
+			faces.size(),					// count
+			GL_UNSIGNED_INT,	// type
+			(void*)0						// element array buffer offset
+		);
+
+		glDisableVertexAttribArray(0);
+
+		// ----------------------------------------------
+		// Second light (only light changes)
+		// ----------------------------------------------
+
+		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName2);
+		glViewport(0, 0, 1024, 1024);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(depthProgramID2);
+
+		depthProjectionMatrix = glm::ortho<float>(-20, 20, -20, 20, -20, 20);
+		depthViewMatrix = glm::lookAt(lightPos2, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		depthModelMatrix = glm::mat4(1.0f);
+		glm::mat4 depthMVP2 = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+
+		glUniformMatrix4fv(depthMatrixID2, 1, GL_FALSE, &depthMVP2[0][0]);
+
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glVertexAttribPointer(
+			0,
+			3,
+			GL_FLOAT,	
+			GL_FALSE,
+			0,
+			(void*)0
+		);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+
+		glDrawElements(
+			GL_TRIANGLES,
+			faces.size(),
+			GL_UNSIGNED_INT,
+			(void*)0
+		);
+
+		glDisableVertexAttribArray(0);
+
+		// -----------------------------------------------------------
+		// Third light (back light, only light changes)
+		// -----------------------------------------------------------
+
+		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName2);
+		glViewport(0, 0, 1024, 1024);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(depthProgramID2);
+		
+		depthProjectionMatrix = glm::ortho<float>(-20, 20, -20, 20, -20, 20);
+		depthViewMatrix = glm::lookAt(lightPos3, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		depthModelMatrix = glm::mat4(1.0f);
+		glm::mat4 depthMVP3 = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+
+		glUniformMatrix4fv(depthMatrixID3, 1, GL_FALSE, &depthMVP3[0][0]);
+
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glVertexAttribPointer(
+			0,	
+			3,	
+			GL_FLOAT,
+			GL_FALSE,	
+			0,
+			(void*)0
+		);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+
+		glDrawElements(
+			GL_TRIANGLES,
+			faces.size(),
+			GL_UNSIGNED_INT,
+			(void*)0
 		);
 
 		glDisableVertexAttribArray(0);
 
 		// ----------------------------
-		// Second light
-		// ----------------------------
-
-		// ----------------------------
-		// Third light (back light)
-		// ----------------------------
-
-		// ----------------------------
 		// Render to the screen
 		// ----------------------------
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, WIDTH, HEIGHT); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
 		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
+		glCullFace(GL_BACK);
 
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -400,6 +529,7 @@ int main(int argc, char* argv[]) {
 
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
+		// Get depth matrix
 		glm::mat4 biasMatrix(
 			0.5, 0.0, 0.0, 0.0,
 			0.0, 0.5, 0.0, 0.0,
@@ -407,17 +537,22 @@ int main(int argc, char* argv[]) {
 			0.5, 0.5, 0.5, 1.0
 		);	
 		glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
+		glm::mat4 depthBiasMVP2 = biasMatrix * depthMVP2;
+		glm::mat4 depthBiasMVP3 = biasMatrix * depthMVP3;
 		
 		// Send transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+		// in the "Depth" uniform
 		glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &depthBiasMVP[0][0]);
-
+		glUniformMatrix4fv(DepthBiasID2, 1, GL_FALSE, &depthBiasMVP2[0][0]);
+		glUniformMatrix4fv(DepthBiasID3, 1, GL_FALSE, &depthBiasMVP3[0][0]);
+		// in the "Light" uniform
 		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
-		//glUniform3f(LightID2, lightPos2.x, lightPos2.y, lightPos2.z);
-		//glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
+		glUniform3f(LightID2, lightPos2.x, lightPos2.y, lightPos2.z);
+		glUniform3f(LightID3, lightPos3.x, lightPos3.y, lightPos3.z);
 
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
@@ -425,9 +560,20 @@ int main(int argc, char* argv[]) {
 		// Set our "textureSampler" sampler to use Texture Unit 0
 		glUniform1i(TextureID, 0);
 
+		// First light
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
 		glUniform1i(ShadowMapID, 1);
+
+		// Second light
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, depthTexture2);
+		glUniform1i(ShadowMapID2, 2);
+
+		// Third light
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, depthTexture3);
+		glUniform1i(ShadowMapID2, 3);
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -470,7 +616,7 @@ int main(int argc, char* argv[]) {
 
 		glDrawElements(
 			GL_TRIANGLES,		// mode
-			faces.size(),			// count
+			faces.size(),					// count
 			GL_UNSIGNED_INT,	// type
 			(void*)0						// element array buffer offset
 		);
@@ -492,12 +638,21 @@ int main(int argc, char* argv[]) {
 	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &normalbuffer);
 	glDeleteBuffers(1, &elementbuffer);
+
 	glDeleteProgram(programID);
 	glDeleteProgram(depthProgramID);
-	glDeleteTextures(1, &Texture);
-
+	glDeleteProgram(depthProgramID2);
+	glDeleteProgram(depthProgramID3);
+	
 	glDeleteFramebuffers(1, &FramebufferName);
+	glDeleteFramebuffers(1, &FramebufferName2);
+	glDeleteFramebuffers(1, &FramebufferName3);
+
+	glDeleteTextures(1, &Texture);
 	glDeleteTextures(1, &depthTexture);
+	glDeleteTextures(1, &depthTexture2);
+	glDeleteTextures(1, &depthTexture3);
+
 	glDeleteVertexArrays(1, &VertexArrayID);
 
 	// Close OpenGL window and terminate GLFW
