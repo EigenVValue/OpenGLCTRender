@@ -106,10 +106,48 @@ CT 值：
 //	}
 //}
 
+//void getUVs(
+//	const std::vector<vec3> & vertices,
+//	const std::vector<int> & colors,
+//	std::vector<vec2> & uvs
+//) {
+//	//	1. 脂肪			-100 - [-20]
+//	//	2. 水				0
+//	//	3. 血浆			3 - 10
+//	//	4. 胆囊			11 - 30
+//	//	5. 混合部分	31 - 50
+//	//	6. 肝脏			51 - 70
+//	//	7. 骨				>400
+//
+//	for (auto color : colors)
+//	{
+//		vec2 uv;
+//		if (color >=0 && color <= 100)
+//		{
+//			uv = vec2(0.25f, 1.0f - 0.25f);
+//		}
+//		else if (color >= 101 && color <= 180)
+//		{
+//			uv = vec2(0.75f, 1.0f - 0.25f);
+//		}
+//		else if (color >= 181 && color <= 255)
+//		{
+//			uv = vec2(0.25f, 1.0f - 0.75f);
+//		}
+//		else
+//		{
+//			uv = vec2(0.75f, 1.0f - 0.75f);
+//		}
+//		uvs.push_back(uv);
+//	}
+//}
+
+
 void getUVs(
 	const std::vector<vec3> & vertices,
 	const std::vector<int> & colors,
-	std::vector<vec2> & uvs
+	std::vector<vec2> & uvs,
+	const uint8_t THRESHOLD
 ) {
 	//	1. 脂肪			-100 - [-20]
 	//	2. 水				0
@@ -121,23 +159,40 @@ void getUVs(
 
 	for (auto color : colors)
 	{
+		if (color < THRESHOLD)
+		{
+			color = THRESHOLD;
+		}
 		vec2 uv;
-		if (color >= 0 && color <= 100)
+		if (color < 0)
 		{
-			uv = vec2(0.25f, 1.0f - 0.25f);
+			uv = vec2(0.0f+0.01f, 1.0f - 0.25f);
 		}
-		else if (color >= 101 && color <= 180)
+		else if (color == 0)
 		{
-			uv = vec2(0.75f, 1.0f - 0.25f);
+			uv = vec2(0.125f + 0.01f, 1.0f - 0.25f);
 		}
-		else if (color >= 181 && color <= 255)
+		else if (color >= 1 && color <= 10)
 		{
-			uv = vec2(0.25f, 1.0f - 0.75f);
+			uv = vec2(0.125f * 2 + 0.01f, 1.0f - 0.25f);
 		}
-		else
+		else if (color >= 11 && color <= 30)
 		{
-			uv = vec2(0.75f, 1.0f - 0.75f);
+			uv = vec2(0.125f * 3 + 0.01f, 1.0f - 0.25f);
+		}
+		else if (color >= 31 && color <= 50)
+		{
+			uv = vec2(0.125f * 4 + 0.01f, 1.0f - 0.25f);
+		}
+		else if (color >= 51 && color <= 70)
+		{
+			uv = vec2(0.125f * 5 + 0.01f, 1.0f - 0.25f);
+		}
+		else if (color >= 70)
+		{
+			uv = vec2(0.125f * 6 + 0.01f, 1.0f - 0.25f);
 		}
 		uvs.push_back(uv);
 	}
 }
+

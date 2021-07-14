@@ -14,7 +14,7 @@ test.cpp is the main function used to add and test new function.
 dependencies folder includes GLFW, GLEW, GLM and some thirdparties.  
 
 How to play:  
-~~sample obj is the cube.obj file, add it into x64\release\img folder.  ~~
+~~sample obj is the cube.obj file, add it into x64\release\img folder.~~  
 Use a dcm image sequences, modify PATH variable as your dcm folder path.  
 You can choose CONTROLS.CPP. It rotates model so you can see immersive light.  
 CONTROLSFORFOV.CPP rotates the view matrix so it is much faster to run than controls. But lights will not change.  
@@ -50,4 +50,4 @@ TODO:
 [-] add quaternions(no need)   
 [X] add FOV control   
 [ ] remove dcm noise  
-[ ] add thread  
+[-] add thread(a little bit hard)  

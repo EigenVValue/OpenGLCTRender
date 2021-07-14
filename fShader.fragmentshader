@@ -95,7 +95,8 @@ vec3 calLight(
 	float cosAlpha = clamp( dot(v,r), 0,1 );
 	// Specular ends
 	
-	// Shadow
+	// Shadow starts
+	
 	float visibility = 1.0;
 
 	// variable bias
@@ -114,7 +115,6 @@ vec3 calLight(
 		
 		// being fully in the shadow will eat up 4*0.2 = 0.8
 		// 0.2 potentially remain, which is quite dark.
-		
 		visibility -= 
 			0.2 * (1.0 - texture(
 						shadowMap,
@@ -139,34 +139,35 @@ void main()
 {
 	// Ambient
 	// Light emission properties
-	vec3 LightColor = vec3(0.8,0.8,0.8);
+	vec3 LightColor = vec3(0.7,0.7,0.7);
 	// Material properties
-	vec3 MaterialAmbientColor = vec3(0.2,0.2,0.2);
+	vec3 MaterialAmbientColor = vec3(0.3,0.3,0.3);
 
 	vec3 ambient = MaterialAmbientColor * LightColor;
 
 	// Three light point
-	// Side light with light power 180 & 120 (in 255).
+	// Side light with light power 120 & 100 (in 255).
 	vec3 result = calLight(
 		LightDirection_cameraspace,
 		LightPosition_worldspace,
-		180,
+		120,
 		ShadowCoord,
 		shadowMap
 		);
+		
 	result = result + calLight(
 		LightDirection_cameraspace2,
 		LightPosition_worldspace2,
-		120,
+		100,
 		ShadowCoord2,
 		shadowMap2
 		);
 
-	// Back light with light power 60 (in 255).
+	// Back light with light power 40 (in 255).
 	result = result + calLight(
 		LightDirection_cameraspace3,
 		LightPosition_worldspace3,
-		70,
+		40,
 		ShadowCoord3,
 		shadowMap3
 		);
